@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -20,54 +20,54 @@ int_t psgst02(trans_t trans, int_t m, int_t n, int_t nrhs, SuperMatrix *A,
  * and Xerox Palo Alto Research Center.
  * September 10, 2007
  *
- *  Purpose   
- *  =======   
+ *  Purpose
+ *  =======
  *
- *  psgst02() computes the residual for a solution of a system of linear   
- *  equations  A*x = b  or  A'*x = b:   
- *      RESID = norm(B - A*X) / ( norm(A) * norm(X) * EPS ),   
- *  where EPS is the machine epsilon.   
+ *  psgst02() computes the residual for a solution of a system of linear
+ *  equations  A*x = b  or  A'*x = b:
+ *      RESID = norm(B - A*X) / ( norm(A) * norm(X) * EPS ),
+ *  where EPS is the machine epsilon.
  *
- *  Arguments   
- *  =========   
+ *  Arguments
+ *  =========
  *
  *  TRANS   (input) trans_t
- *          Specifies the form of the system of equations:   
- *          = NOTRANS: A *x = b   
- *          = TRANS:   A'*x = b, where A' is the transpose of A   
- *          = CONJ:    A'*x = b, where A' is the conjugate transpose of A   
+ *          Specifies the form of the system of equations:
+ *          = NOTRANS: A *x = b
+ *          = TRANS:   A'*x = b, where A' is the transpose of A
+ *          = CONJ:    A'*x = b, where A' is the conjugate transpose of A
  *
- *  M       (input) INTEGER   
+ *  M       (input) INTEGER
  *
- *  N       (input) INTEGER   
- *          The number of columns of the matrix A.  N >= 0.   
+ *  N       (input) INTEGER
+ *          The number of columns of the matrix A.  N >= 0.
  *
- *  NRHS    (input) INTEGER   
- *          The number of columns of B, the matrix of right hand sides.   
+ *  NRHS    (input) INTEGER
+ *          The number of columns of B, the matrix of right hand sides.
  *          NRHS >= 0.
  *
- *  A       (input) SuperMatrix*, dimension (LDA,N)   
- *          The original M x N sparse matrix A.   
+ *  A       (input) SuperMatrix*, dimension (LDA,N)
+ *          The original M x N sparse matrix A.
  *
- *  X       (input) DOUBLE PRECISION array, dimension (LDX,NRHS)   
- *          The computed solution vectors for the system of linear   
- *          equations.   
+ *  X       (input) DOUBLE PRECISION array, dimension (LDX,NRHS)
+ *          The computed solution vectors for the system of linear
+ *          equations.
  *
- *  LDX     (input) INTEGER   
- *          The leading dimension of the array X.  If TRANS = NOTRANS,   
- *          LDX >= max(1,N); if TRANS = TRANS or CONJ, LDX >= max(1,M).   
+ *  LDX     (input) INTEGER
+ *          The leading dimension of the array X.  If TRANS = NOTRANS,
+ *          LDX >= max(1,N); if TRANS = TRANS or CONJ, LDX >= max(1,M).
  *
- *  B       (input/output) DOUBLE PRECISION array, dimension (LDB,NRHS)   
- *          On entry, the right hand side vectors for the system of   
- *          linear equations.   
- *          On exit, B is overwritten with the difference B - A*X.   
+ *  B       (input/output) DOUBLE PRECISION array, dimension (LDB,NRHS)
+ *          On entry, the right hand side vectors for the system of
+ *          linear equations.
+ *          On exit, B is overwritten with the difference B - A*X.
  *
- *  LDB     (input) INTEGER   
+ *  LDB     (input) INTEGER
  *          The leading dimension of the array B.  IF TRANS = NOTRANS,
  *          LDB >= max(1,M); if TRANS = TRANS or CONJ, LDB >= max(1,N).
  *
- *  RESID   (output) DOUBLE PRECISION   
- *          The maximum over the number of right hand sides of   
+ *  RESID   (output) DOUBLE PRECISION
+ *          The maximum over the number of right hand sides of
  *
  *  =====================================================================
 */
@@ -75,14 +75,14 @@ int_t psgst02(trans_t trans, int_t m, int_t n, int_t nrhs, SuperMatrix *A,
     /* Table of constant values */
     float alpha = -1.;
     float beta  = 1.;
-    int    c__1  = 1;
-    
+    int_t    c__1  = 1;
+
     /* System generated locals */
     float d__1, d__2;
 
     /* Local variables */
     int_t j;
-    int n1, n2;
+    int_t n1, n2;
     float anorm, bnorm;
     float xnorm;
     float eps;
@@ -93,7 +93,7 @@ int_t psgst02(trans_t trans, int_t m, int_t n, int_t nrhs, SuperMatrix *A,
     extern float slangs(char *, SuperMatrix *);
     extern float sasum_(int *, float *, int *);
     extern double slamch_(char *);
-    
+
     /* Function Body */
     if ( m <= 0 || n <= 0 || nrhs == 0) {
 	*resid = 0.;
@@ -127,8 +127,8 @@ int_t psgst02(trans_t trans, int_t m, int_t n, int_t nrhs, SuperMatrix *A,
 
     /*for (j = 0; j < m; ++j)
       if ( b[j] > 0.001 ) { printf("b-Ax: %d, %f\n", j, b[j]); b[j] = 1.; }*/
- 
-    /* Compute the maximum over the number of right hand sides of   
+
+    /* Compute the maximum over the number of right hand sides of
        norm(B - A*X) / ( norm(A) * norm(X) * EPS ) . */
 
     *resid = 0.;
@@ -147,4 +147,3 @@ int_t psgst02(trans_t trans, int_t m, int_t n, int_t nrhs, SuperMatrix *A,
     return 0;
 
 } /* psgst02 */
-

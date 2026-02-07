@@ -58,13 +58,12 @@ double usertimer_()
 }
 
 
-double extract(tv)
-struct timeval *tv;
+double extract(struct timeval *tv)
 {
   double tmp;
 
   tmp = tv->tv_sec;
-  tmp += tv->tv_usec/1000000.0;
+  tmp += tv->tv_usec/1.0e6;
 
   return(tmp);
 }

@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -13,7 +13,7 @@ at the top-level directory.
 
 
 void
-psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r, 
+psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
        SuperMatrix *L, SuperMatrix *U, SuperMatrix *B, int_t *info )
 {
 /*
@@ -30,8 +30,8 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
  *
  *   1. If A is stored column-wise (A->Stype = NC):
  *
- *      1.1. Permute the columns of A, forming A*Pc, where Pc is a 
- *           permutation matrix. 
+ *      1.1. Permute the columns of A, forming A*Pc, where Pc is a
+ *           permutation matrix.
  *           For more details of this step, see sp_preorder.c.
  *
  *      1.2. Factor A as Pr*A*Pc=L*U with the permutation Pr determined
@@ -46,7 +46,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
  *      to the tranpose of A:
  *
  *      2.1. Permute columns of tranpose(A) (rows of A),
- *           forming transpose(A)*Pc, where Pc is a permutation matrix. 
+ *           forming transpose(A)*Pc, where Pc is a permutation matrix.
  *           For more details of this step, see sp_preorder.c.
  *
  *      2.2. Factor A as Pr*transpose(A)*Pc=L*U with the permutation Pr
@@ -56,7 +56,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
  *
  *      2.3. Solve the system of equations A*X=B using the factored
  *           form of A.
- * 
+ *
  *   See supermatrix.h for the definition of "SuperMatrix" structure.
  *
  *
@@ -77,7 +77,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
  *
  * perm_c (input/output) int_t*
  *        If A->Stype=NC, column permutation vector of size A->ncol,
- *        which defines the permutation matrix Pc; perm_c[i] = j means 
+ *        which defines the permutation matrix Pc; perm_c[i] = j means
  *        column i of A is in position j in A*Pc.
  *        On exit, perm_c may be overwritten by the product of the input
  *        perm_c and a permutation that postorders the elimination tree
@@ -85,13 +85,13 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
  *        is already in postorder.
  *
  *        If A->Stype=NR, column permutation vector of size A->nrow
- *        which describes permutation of columns of tranpose(A) 
+ *        which describes permutation of columns of tranpose(A)
  *        (rows of A) as described above.
- * 
+ *
  * perm_r (output) int_t*,
- *        If A->Stype=NR, row permutation vector of size A->nrow, 
- *        which defines the permutation matrix Pr, and is determined 
- *        by partial pivoting.  perm_r[i] = j means row i of A is in 
+ *        If A->Stype=NR, row permutation vector of size A->nrow,
+ *        which defines the permutation matrix Pr, and is determined
+ *        by partial pivoting.  perm_r[i] = j means row i of A is in
  *        position j in Pr*A.
  *
  *        If A->Stype=NR, permutation vector of size A->ncol, which
@@ -99,7 +99,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
  *        (columns of A) as described above.
  *
  * L      (output) SuperMatrix*
- *        The factor L from the factorization 
+ *        The factor L from the factorization
  *            Pr*A*Pc=L*U              (if A->Stype=NC) or
  *            Pr*transpose(A)*Pc=L*U   (if A->Stype=NR).
  *        Uses compressed row subscripts storage for supernodes, i.e.,
@@ -125,7 +125,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
  *                so the solution could not be computed.
  *             > A->ncol: number of bytes allocated when memory allocation
  *                failure occurred, plus A->ncol.
- *   
+ *
  */
     trans_t  trans;
     NCformat *Astore;
@@ -133,7 +133,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
     SuperMatrix *AA; /* A in NC format used by the factorization routine.*/
     SuperMatrix AC; /* Matrix postmultiplied by Pc */
     int_t  n, panel_size, relax;
-    int i;
+    int_t i;
     fact_t   fact;
     yes_no_t refact, usepr;
     float diag_pivot_thresh, drop_tol;
@@ -152,7 +152,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
     Bstore = B->Store;
     *info = 0;
     if ( nprocs <= 0 ) *info = -1;
-    else if ( A->nrow != A->ncol || A->nrow < 0 || 
+    else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      (A->Stype != SLU_NC && A->Stype != SLU_NR) ||
 	      A->Dtype != SLU_S || A->Mtype != SLU_GE )
 	*info = -2;
@@ -164,8 +164,8 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
     }
 
 #if 0
-    /* Use the best sequential code. 
-       if this part is commented out, we will use the parallel code 
+    /* Use the best sequential code.
+       if this part is commented out, we will use the parallel code
        run on one processor. */
     if ( nprocs == 1 ) {
         return;
@@ -184,7 +184,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
     lwork              = 0;
 
     /* ------------------------------------------------------------
-       Allocate storage and initialize statistics variables. 
+       Allocate storage and initialize statistics variables.
        ------------------------------------------------------------*/
     n = A->ncol;
     StatAlloc(n, nprocs, panel_size, relax, &Gstat);
@@ -198,7 +198,7 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
     if ( A->Stype == SLU_NR ) {
 	NRformat *Astore = A->Store;
 	AA = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
-	sCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz, 
+	sCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz,
 			       Astore->nzval, Astore->colind, Astore->rowptr,
 			       SLU_NC, A->Dtype, A->Mtype);
 	trans = TRANS;

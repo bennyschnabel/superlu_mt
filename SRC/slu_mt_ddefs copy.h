@@ -24,11 +24,11 @@ at the top-level directory.
  *
  */
 
-#ifndef __SLU_MT_ZDEFS /* allow multiple inclusions */
-#define __SLU_MT_ZDEFS
+#ifndef __SLU_MT_DDEFS /* allow multiple inclusions */
+#define __SLU_MT_DDEFS
 
 /*
- * File name:           slu_mt_zdefs.h
+ * File name:           slu_mt_ddefs.h
  * Purpose:             Sparse matrix types and function prototypes
  * History:
  */
@@ -53,7 +53,7 @@ at the top-level directory.
 #endif
 
 /* Define my integer type int_t */
-#ifdef _LONGINT
+#if 1
 typedef long long int int_t;
 #define IFMT "%lld"
 #else
@@ -67,7 +67,6 @@ typedef int int_t; /* default */
 #include "slu_mt_util.h"
 #include "pxgstrf_synch.h"
 
-#include "slu_dcomplex.h"
 
 /*
  * *************************************************
@@ -167,10 +166,10 @@ typedef struct {
     int_t     *lsub;    /* compressed L subscripts */
     int_t	    *xlsub;
     int_t     *xlsub_end;
-    doublecomplex  *lusup;   /* L supernodes */
+    double  *lusup;   /* L supernodes */
     int_t     *xlusup;
     int_t     *xlusup_end;
-    doublecomplex  *ucol;    /* U columns */
+    double  *ucol;    /* U columns */
     int_t     *usub;
     int_t	    *xusub;
     int_t     *xusub_end;
@@ -233,7 +232,7 @@ typedef struct {
     int_t  info; /* error code returned from each thread */
     superlumt_options_t *superlumt_options;
     pxgstrf_shared_t  *pxgstrf_shared; /* shared for LU factorization */
-} pzgstrf_threadarg_t;
+} pdgstrf_threadarg_t;
 
 
 /* *********************
@@ -249,39 +248,39 @@ extern "C" {
    Driver routines
    ---------------*/
 extern void
-pzgssv(int_t, SuperMatrix *, int_t *, int_t *, SuperMatrix *, SuperMatrix *,
+pdgssv(int_t, SuperMatrix *, int_t *, int_t *, SuperMatrix *, SuperMatrix *,
        SuperMatrix *, int_t *);
 extern void
-pzgssvx(int_t, superlumt_options_t *, SuperMatrix *, int_t *, int_t *,
+pdgssvx(int_t, superlumt_options_t *, SuperMatrix *, int_t *, int_t *,
 	equed_t *, double *, double *, SuperMatrix *, SuperMatrix *,
 	SuperMatrix *, SuperMatrix *,
 	double *, double *, double *, double *, superlu_memusage_t *,
 	int_t *);
 extern void
-c_bridge_pzgssv_(int_t *nprocs, int_t *n, int_t *nnz, int_t *nrhs,
-		 doublecomplex *values, int_t *rowind, int_t *colptr,
-		 doublecomplex *b, int_t *ldb, int_t *info);
+c_bridge_pdgssv_(int_t *nprocs, int_t *n, int_t *nnz, int_t *nrhs,
+		 double *values, int_t *rowind, int_t *colptr,
+		 double *b, int_t *ldb, int_t *info);
 
 /* ---------------
    Driver related
    ---------------*/
-extern void zgsequ (SuperMatrix *, double *, double *, double *,
+extern void dgsequ (SuperMatrix *, double *, double *, double *,
                     double *, double *, int_t *);
-extern void zlaqgs (SuperMatrix *, double *, double *, double,
+extern void dlaqgs (SuperMatrix *, double *, double *, double,
 		    double, double, equed_t *);
-extern void zgscon (char *, SuperMatrix *, SuperMatrix *,
+extern void dgscon (char *, SuperMatrix *, SuperMatrix *,
 		    double, double *, int_t *);
-extern double zPivotGrowth(int_t, SuperMatrix *, int_t *,
+extern double dPivotGrowth(int_t, SuperMatrix *, int_t *,
 			   SuperMatrix *, SuperMatrix *);
-extern void zgsrfs (trans_t, SuperMatrix *, SuperMatrix *, SuperMatrix *,
+extern void dgsrfs (trans_t, SuperMatrix *, SuperMatrix *, SuperMatrix *,
 		    int_t *, int_t *, equed_t, double *, double *, SuperMatrix *,
 		    SuperMatrix *, double *, double *, Gstat_t *, int_t *);
-extern int_t  sp_ztrsv (char *, char *, char *, SuperMatrix *, SuperMatrix *,
-		      doublecomplex *, int_t *);
-extern int_t  sp_zgemv (char *, doublecomplex, SuperMatrix *, doublecomplex *,
-		      int_t, doublecomplex, doublecomplex *, int_t);
-extern int_t  sp_zgemm (char *, int_t, int_t, int_t, doublecomplex, SuperMatrix *,
-		      doublecomplex *, int_t, doublecomplex, doublecomplex *, int_t);
+extern int_t  sp_dtrsv (char *, char *, char *, SuperMatrix *, SuperMatrix *,
+		      double *, int_t *);
+extern int_t  sp_dgemv (char *, double, SuperMatrix *, double *,
+		      int_t, double, double *, int_t);
+extern int_t  sp_dgemm (char *, int_t, int_t, int_t, double, SuperMatrix *,
+		      double *, int_t, double, double *, int_t);
 
 /* ----------------------
    Factorization related
@@ -291,7 +290,7 @@ extern void pxgstrf_scheduler (const int_t, const int_t, const int_t *,
 extern int  ParallelInit (int_t, pxgstrf_relax_t *, superlumt_options_t *,
 			  pxgstrf_shared_t *);
 extern int_t  ParallelFinalize (pxgstrf_shared_t *);
-extern void pzgstrf_StackFree ();
+extern void pdgstrf_StackFree ();
 extern int_t  queue_init (queue_t *, int_t);
 extern int_t  queue_destroy (queue_t *);
 extern int_t  EnqueueRelaxSnode (queue_t *, int_t, pxgstrf_relax_t *,
@@ -304,25 +303,25 @@ extern int_t  lockon(int_t *);
 extern void PartDomains(const int_t, const float, SuperMatrix *, int_t *, int_t *);
 
 extern void
-zCreate_CompCol_Matrix(SuperMatrix *, int_t, int_t, int_t, doublecomplex *,
+dCreate_CompCol_Matrix(SuperMatrix *, int_t, int_t, int_t, double *,
 		      int_t *, int_t *, Stype_t, Dtype_t, Mtype_t);
 void
-zCreate_CompCol_Permuted(SuperMatrix *, int_t, int_t, int_t, doublecomplex *, int_t *,
+dCreate_CompCol_Permuted(SuperMatrix *, int_t, int_t, int_t, double *, int_t *,
 			 int_t *, int_t *, Stype_t, Dtype_t, Mtype_t);
 extern void
-zCopy_CompCol_Matrix(SuperMatrix *, SuperMatrix *);
+dCopy_CompCol_Matrix(SuperMatrix *, SuperMatrix *);
 extern void
-zCreate_Dense_Matrix(SuperMatrix *, int_t, int_t, doublecomplex *, int_t,
+dCreate_Dense_Matrix(SuperMatrix *, int_t, int_t, double *, int_t,
 		     Stype_t, Dtype_t, Mtype_t);
 extern void
-zCreate_SuperNode_Matrix(SuperMatrix *, int_t, int_t, int_t, doublecomplex *, int_t *, int_t *,
+dCreate_SuperNode_Matrix(SuperMatrix *, int_t, int_t, int_t, double *, int_t *, int_t *,
 			int_t *, int_t *, int_t *, Stype_t, Dtype_t, Mtype_t);
 extern void
-zCreate_SuperNode_Permuted(SuperMatrix *, int_t, int_t, int_t, doublecomplex *,
+dCreate_SuperNode_Permuted(SuperMatrix *, int_t, int_t, int_t, double *,
 			   int_t *, int_t *, int_t *, int_t *, int_t *, int_t *,
 			   int_t *, int_t *, Stype_t, Dtype_t, Mtype_t);
 extern void
-zCopy_Dense_Matrix(int_t, int_t, doublecomplex *, int_t, doublecomplex *, int_t);
+dCopy_Dense_Matrix(int_t, int_t, double *, int_t, double *, int_t);
 
 extern void Destroy_SuperMatrix_Store(SuperMatrix *);
 extern void Destroy_CompCol_Matrix(SuperMatrix *);
@@ -331,81 +330,81 @@ extern void Destroy_CompCol_NCP(SuperMatrix *);
 extern void Destroy_SuperNode_Matrix(SuperMatrix *);
 extern void Destroy_SuperNode_SCP(SuperMatrix *);
 
-extern void zallocateA (int_t, int_t, doublecomplex **, int_t **, int_t **);
+extern void dallocateA (int_t, int_t, double **, int_t **, int_t **);
 extern void StatAlloc (const int_t, const int_t, const int_t, const int_t, Gstat_t*);
 extern void StatInit  (const int_t, const int_t, Gstat_t*);
 extern void StatFree  (Gstat_t*);
 extern void get_perm_c(int_t, SuperMatrix *, int_t *);
-extern int_t  zPresetMap (const int_t, SuperMatrix *, pxgstrf_relax_t *,
+extern int_t  dPresetMap (const int_t, SuperMatrix *, pxgstrf_relax_t *,
 		       superlumt_options_t *, GlobalLU_t *);
 extern int_t  qrnzcnt (int_t, int_t, int_t *, int_t *, int_t *, int_t *, int_t *, int_t *,
 		     int_t *, int_t *, int_t *, int_t *);
 extern int_t  DynamicSetMap(const int_t, const int_t, const int_t, pxgstrf_shared_t*);
-extern void pzgstrf (superlumt_options_t *, SuperMatrix *, int_t *,
+extern void pdgstrf (superlumt_options_t *, SuperMatrix *, int_t *,
 		     SuperMatrix *, SuperMatrix *, Gstat_t *, int_t *);
-extern void pzgstrf_init (int_t, fact_t, trans_t, yes_no_t, int_t, int_t, double, yes_no_t, double,
+extern void pdgstrf_init (int_t, fact_t, trans_t, yes_no_t, int_t, int_t, double, yes_no_t, double,
 			  int_t *, int_t *, void *, int_t, SuperMatrix *,
 			  SuperMatrix *, superlumt_options_t *, Gstat_t *);
-extern void *pzgstrf_thread(void *);
-extern pzgstrf_threadarg_t*
-pzgstrf_thread_init (SuperMatrix *, SuperMatrix *, SuperMatrix *,
+extern void *pdgstrf_thread(void *);
+extern pdgstrf_threadarg_t*
+pdgstrf_thread_init (SuperMatrix *, SuperMatrix *, SuperMatrix *,
 		     superlumt_options_t*, pxgstrf_shared_t*, Gstat_t*, int_t*);
 extern void
-pzgstrf_thread_finalize (pzgstrf_threadarg_t *, pxgstrf_shared_t *,
+pdgstrf_thread_finalize (pdgstrf_threadarg_t *, pxgstrf_shared_t *,
 			 SuperMatrix *, int_t *, SuperMatrix *, SuperMatrix *);
-extern void pzgstrf_finalize(superlumt_options_t *, SuperMatrix *);
+extern void pdgstrf_finalize(superlumt_options_t *, SuperMatrix *);
 extern void pxgstrf_finalize(superlumt_options_t *, SuperMatrix *);
 extern void pxgstrf_relax_snode (const int_t, superlumt_options_t *,
 				 pxgstrf_relax_t *);
 extern int_t
-pzgstrf_factor_snode (const int_t, const int_t, SuperMatrix *, const double,
+pdgstrf_factor_snode (const int_t, const int_t, SuperMatrix *, const double,
 		      yes_no_t *, int_t *, int_t *, int_t*, int_t*, int_t*, int_t*,
-		      doublecomplex *, doublecomplex *, pxgstrf_shared_t *, int_t *);
+		      double *, double *, pxgstrf_shared_t *, int_t *);
 extern void
 pxgstrf_mark_busy_descends (int_t, int_t, int_t *, pxgstrf_shared_t *, int_t *, int_t *);
-extern int_t  pzgstrf_snode_dfs (const int_t, const int_t, const int_t, const int_t *,
+extern int_t  pdgstrf_snode_dfs (const int_t, const int_t, const int_t, const int_t *,
 			       const int_t *, const int_t *, int_t*, int_t *, int_t *,
 			       pxgstrf_shared_t *);
-extern int_t  pzgstrf_snode_bmod (const int_t, const int_t, const int_t, const int_t,
-				doublecomplex *, doublecomplex *, GlobalLU_t*, Gstat_t*);
-extern void pzgstrf_panel_dfs (const int_t, const int_t, const int_t, const int_t,
+extern int_t  pdgstrf_snode_bmod (const int_t, const int_t, const int_t, const int_t,
+				double *, double *, GlobalLU_t*, Gstat_t*);
+extern void pdgstrf_panel_dfs (const int_t, const int_t, const int_t, const int_t,
 			       SuperMatrix *, int_t*, int_t*, int_t*, int_t*, int_t*,
 			       int_t*, int_t*, int_t*, int_t*, int_t*, int_t*, int_t*, int_t*,
-			       doublecomplex*, GlobalLU_t *);
-extern void pzgstrf_panel_bmod (const int_t, const int_t, const int_t, const int_t,
+			       double*, GlobalLU_t *);
+extern void pdgstrf_panel_bmod (const int_t, const int_t, const int_t, const int_t,
 				const int_t, int_t*, int_t*, int_t*, int_t*, int_t*, int_t*,
-				int_t*, int_t*, doublecomplex*, doublecomplex*,
+				int_t*, int_t*, double*, double*,
 				pxgstrf_shared_t *);
-extern void pzgstrf_bmod1D (const int_t, const int_t, const int_t, const int_t,
+extern void pdgstrf_bmod1D (const int_t, const int_t, const int_t, const int_t,
 			    const int_t, const int_t, const int_t, int_t, int_t,
-			    int_t *, int_t *, int_t *, int_t *, doublecomplex *, doublecomplex *,
+			    int_t *, int_t *, int_t *, int_t *, double *, double *,
 			    GlobalLU_t *, Gstat_t *);
-extern void pzgstrf_bmod2D (const int_t, const int_t, const int_t, const int_t,
+extern void pdgstrf_bmod2D (const int_t, const int_t, const int_t, const int_t,
 			    const int_t, const int_t, const int_t, int_t, int_t,
-			    int_t *, int_t *, int_t *, int_t *, doublecomplex *, doublecomplex *,
+			    int_t *, int_t *, int_t *, int_t *, double *, double *,
 			    GlobalLU_t *, Gstat_t *);
-extern void pzgstrf_bmod1D_mv2 (const int_t, const int_t, const int_t, const int_t,
+extern void pdgstrf_bmod1D_mv2 (const int_t, const int_t, const int_t, const int_t,
 				const int_t, const int_t, const int_t, int_t, int_t,
-				int_t *, int_t *, int_t *, int_t *, doublecomplex *,
-				doublecomplex *, GlobalLU_t *, Gstat_t *);
-extern void pzgstrf_bmod2D_mv2 (const int_t, const int_t, const int_t, const int_t,
+				int_t *, int_t *, int_t *, int_t *, double *,
+				double *, GlobalLU_t *, Gstat_t *);
+extern void pdgstrf_bmod2D_mv2 (const int_t, const int_t, const int_t, const int_t,
 				const int_t, const int_t, const int_t, int_t, int_t,
-				int_t *, int_t *, int_t *, int_t *, doublecomplex *, doublecomplex *,
+				int_t *, int_t *, int_t *, int_t *, double *, double *,
 				GlobalLU_t *, Gstat_t *);
 extern void pxgstrf_super_bnd_dfs (const int_t, const int_t, const int_t,
 				   const int_t, const int_t, SuperMatrix*,
 				   int_t*, int_t*, int_t*, int_t *, int_t *, int_t *,
 				   int_t *, pxgstrf_shared_t *);
-extern int_t  pzgstrf_column_dfs(const int_t, const int_t, const int_t, const int_t,
+extern int_t  pdgstrf_column_dfs(const int_t, const int_t, const int_t, const int_t,
 			       int_t*, int_t*, int_t*, int_t, int_t*, int_t*, int_t*, int_t*,
 			       int_t *, int_t *, int_t *, int_t *, pxgstrf_shared_t *);
-extern int_t  pzgstrf_column_bmod(const int_t, const int_t, const int_t, const int_t,
-				int_t*, int_t*, doublecomplex*, doublecomplex*,
+extern int_t  pdgstrf_column_bmod(const int_t, const int_t, const int_t, const int_t,
+				int_t*, int_t*, double*, double*,
 				pxgstrf_shared_t *, Gstat_t *);
-extern int_t  pzgstrf_pivotL (const int_t, const int_t, const double, yes_no_t*,
+extern int_t  pdgstrf_pivotL (const int_t, const int_t, const double, yes_no_t*,
 			    int_t*, int_t*, int_t*, int_t*, GlobalLU_t*, Gstat_t*);
-extern int_t  pzgstrf_copy_to_ucol (const int_t, const int_t, const int_t, const int_t *,
-				  const int_t *, const int_t *, doublecomplex*,
+extern int_t  pdgstrf_copy_to_ucol (const int_t, const int_t, const int_t, const int_t *,
+				  const int_t *, const int_t *, double*,
 				  pxgstrf_shared_t*);
 extern void pxgstrf_pruneL (const int_t, const int_t *, const int_t, const int_t,
 			    const int_t *, const int_t *, int_t*, int_t *,
@@ -415,52 +414,52 @@ extern void countnz (const int_t, int_t*, int_t *, int_t *, GlobalLU_t *);
 extern void fixupL (const int_t, const int_t *, GlobalLU_t *);
 extern void compressSUP (const int_t, GlobalLU_t *);
 extern int_t  *TreePostorder (int_t, int_t *);
-extern void zreadmt (int_t *, int_t *, int_t *, doublecomplex **, int_t **, int_t **);
-extern void zreadhb (int_t *, int_t *, int_t *, doublecomplex **, int_t **, int_t **);
-extern void zreadMM (int *m, int *n, int_t *nonz, doublecomplex **nzval, int_t **rowind, int_t **colptr);
-extern void zGenXtrue (int_t, int_t, doublecomplex *, int_t);
-extern void zFillRHS (trans_t, int_t, doublecomplex *, int_t,
+extern void dreadmt (int_t *, int_t *, int_t *, double **, int_t **, int_t **);
+extern void dreadhb (int_t *, int_t *, int_t *, double **, int_t **, int_t **);
+extern void dreadMM (int *m, int *n, int_t *nonz, double **nzval, int_t **rowind, int_t **colptr);
+extern void dGenXtrue (int_t, int_t, double *, int_t);
+extern void dFillRHS (trans_t, int_t, double *, int_t,
 		      SuperMatrix *, SuperMatrix *);
-extern void zgstrs (trans_t, SuperMatrix *, SuperMatrix*,
+extern void dgstrs (trans_t, SuperMatrix *, SuperMatrix*,
 		    int_t*, int_t*, SuperMatrix*, Gstat_t *, int_t *);
-extern void zlsolve (int_t, int_t, doublecomplex *, doublecomplex *);
-extern void zusolve (int_t, int_t, doublecomplex *, doublecomplex *);
-extern void zmatvec (int_t, int_t, int_t, doublecomplex *, doublecomplex *, doublecomplex *);
+extern void dlsolve (int_t, int_t, double *, double *);
+extern void dusolve (int_t, int_t, double *, double *);
+extern void dmatvec (int_t, int_t, int_t, double *, double *, double *);
 
 
 /* ---------------
    BLAS
    ---------------*/
-extern int zgemm_(char*, char*, int_t*, int_t*, int_t*, doublecomplex*,
-                  doublecomplex*, int_t*, doublecomplex*, int_t*, doublecomplex*,
-                  doublecomplex*, int_t*);
-extern int ztrsm_(char*, char*, char*, char*, int_t*, int_t*, doublecomplex*,
-                  doublecomplex*, int_t*, doublecomplex*, int_t*);
-extern int ztrsv_(char*, char*, char*, int_t*, doublecomplex*, int_t*,
-                  doublecomplex*, int_t*);
-extern int zgemv_(char*, int_t*, int_t*, doublecomplex*, doublecomplex*,
-		   int_t*, doublecomplex*, int_t*, doublecomplex*, doublecomplex*, int_t*);
+extern int dgemm_(char*, char*, int_t*, int_t*, int_t*, double*,
+                  double*, int_t*, double*, int_t*, double*,
+                  double*, int_t*);
+extern int dtrsm_(char*, char*, char*, char*, int_t*, int_t*, double*,
+                  double*, int_t*, double*, int_t*);
+extern int dtrsv_(char*, char*, char*, int_t*, double*, int_t*,
+                  double*, int_t*);
+extern int dgemv_(char*, int_t*, int_t*, double*, double*,
+		   int_t*, double*, int_t*, double*, double*, int_t*);
 
 /* ---------------
    Memory related
    ---------------*/
-extern float pzgstrf_MemInit (int_t, int_t, superlumt_options_t *,
+extern float pdgstrf_MemInit (int_t, int_t, superlumt_options_t *,
 			SuperMatrix *, SuperMatrix *, GlobalLU_t *);
-extern float pzgstrf_memory_use(const int_t, const int_t, const int_t);
-extern int_t  pzgstrf_WorkInit (int_t, int_t, int_t **, doublecomplex **);
+extern float pdgstrf_memory_use(const int_t, const int_t, const int_t);
+extern int_t  pdgstrf_WorkInit (int_t, int_t, int_t **, double **);
 extern void pxgstrf_SetIWork (int_t, int_t, int_t *, int_t **, int_t **, int_t **,
 		      int_t **, int_t **, int_t **, int_t **);
-extern void pzgstrf_SetRWork (int_t, int_t, doublecomplex *, doublecomplex **, doublecomplex **);
-extern void pzgstrf_WorkFree (int_t *, doublecomplex *, GlobalLU_t *);
-extern int_t  pzgstrf_MemXpand (int_t, int_t, MemType, int_t *, GlobalLU_t *);
+extern void pdgstrf_SetRWork (int_t, int_t, double *, double **, double **);
+extern void pdgstrf_WorkFree (int_t *, double *, GlobalLU_t *);
+extern int_t  pdgstrf_MemXpand (int_t, int_t, MemType, int_t *, GlobalLU_t *);
 
 extern int    *int32Malloc(int);
 extern int_t  *intMalloc (int_t);
 extern int_t  *intCalloc (int_t);
-extern doublecomplex *doublecomplexMalloc(int_t);
-extern doublecomplex *doublecomplexCalloc(int_t);
+extern double *doubleMalloc(int_t);
+extern double *doubleCalloc(int_t);
 extern int_t  memory_usage ();
-extern int_t  superlu_zQuerySpace (int_t, SuperMatrix *, SuperMatrix *, int_t,
+extern int_t  superlu_dQuerySpace (int_t, SuperMatrix *, SuperMatrix *, int_t,
 				 superlu_memusage_t *);
 extern int_t  Glu_alloc (const int_t, const int_t, const int_t, const MemType,
 		       int_t *, pxgstrf_shared_t *);
@@ -475,19 +474,19 @@ extern int     lsame_(char *, char *);
 extern int     xerbla_(char *, int *);
 extern void    superlu_abort_and_exit(char *);
 extern void    ifill(int_t *, int_t, int_t);
-extern void    zfill(doublecomplex *, int_t, doublecomplex);
-extern void    zinf_norm_error(int_t, SuperMatrix *, doublecomplex *);
+extern void    dfill(double *, int_t, double);
+extern void    dinf_norm_error(int_t, SuperMatrix *, double *);
 extern void    dstat_allocate(int_t);
 extern void    snode_profile(int_t, int_t *);
 extern void    super_stats(int_t, int_t *, int_t *);
 extern void    panel_stats(int_t, int_t, int_t *, Gstat_t *);
 extern void    PrintSumm(char *, int_t, int_t, int_t);
-extern void    zPrintPerf(SuperMatrix *, SuperMatrix *, superlu_memusage_t *,
+extern void    dPrintPerf(SuperMatrix *, SuperMatrix *, superlu_memusage_t *,
 			 double, double, double *, double *, char *,
 			 Gstat_t *);
-extern void    zCompRow_to_CompCol(int_t m, int_t n, int_t nnz,
-                           doublecomplex *a, int_t *colind, int_t *rowptr,
-                           doublecomplex **at, int_t **rowind, int_t **colptr);
+extern void    dCompRow_to_CompCol(int_t m, int_t n, int_t nnz,
+                           double *a, int_t *colind, int_t *rowptr,
+                           double **at, int_t **rowind, int_t **colptr);
 
 
 /* -----------------------
@@ -495,7 +494,7 @@ extern void    zCompRow_to_CompCol(int_t m, int_t n, int_t nnz,
    -----------------------*/
 extern void    print_lu_col(int_t, char *, int_t, int_t, int_t, int_t *, GlobalLU_t *);
 extern void    print_panel_seg(int_t, int_t, int_t, int_t, int_t *, int_t *);
-extern void    zcheck_zero_vec(int_t, char *, int_t, doublecomplex *);
+extern void    dcheck_zero_vec(int_t, char *, int_t, double *);
 extern void    check_repfnz(int_t, int_t, int_t, int_t *);
 
 #ifdef __cplusplus
@@ -503,4 +502,4 @@ extern void    check_repfnz(int_t, int_t, int_t, int_t *);
 #endif
 
 
-#endif /* __SLU_MT_ZDEFS */
+#endif /* __SLU_MT_DDEFS */

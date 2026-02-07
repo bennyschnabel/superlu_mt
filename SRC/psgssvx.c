@@ -402,7 +402,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
     char      norm[1];
     trans_t   trant;
     int_t     j, info1;
-    int i;
+    int_t i;
     float amax, anorm, bignum, smlnum, colcnd, rowcnd, rcmax, rcmin;
     int_t       n, relax, panel_size;
     Gstat_t   Gstat;
