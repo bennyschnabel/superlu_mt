@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -24,8 +24,8 @@ at the top-level directory.
 #include "slu_mt_cdefs.h"
 
 
-/* 
- * Function prototypes 
+/*
+ * Function prototypes
  */
 extern void cusolve(int_t, int_t, complex*, complex*);
 extern void clsolve(int_t, int_t, complex*, complex*);
@@ -33,43 +33,43 @@ extern void cmatvec(int_t, int_t, int_t, complex*, complex*, complex*);
 
 
 int_t
-sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L, 
+sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
          SuperMatrix *U, complex *x, int_t *info)
 {
 /*
  *   Purpose
  *   =======
  *
- *   sp_ctrsv() solves one of the systems of equations   
+ *   sp_ctrsv() solves one of the systems of equations
  *       A*x = b,   or   A'*x = b,
- *   where b and x are n element vectors and A is a sparse unit , or   
- *   non-unit, upper or lower triangular matrix.   
- *   No test for singularity or near-singularity is included in this   
- *   routine. Such tests must be performed before calling this routine.   
+ *   where b and x are n element vectors and A is a sparse unit , or
+ *   non-unit, upper or lower triangular matrix.
+ *   No test for singularity or near-singularity is included in this
+ *   routine. Such tests must be performed before calling this routine.
  *
- *   Parameters   
- *   ==========   
+ *   Parameters
+ *   ==========
  *
  *   uplo   - (input) char*
- *            On entry, uplo specifies whether the matrix is an upper or   
- *             lower triangular matrix as follows:   
- *                uplo = 'U' or 'u'   A is an upper triangular matrix.   
- *                uplo = 'L' or 'l'   A is a lower triangular matrix.   
+ *            On entry, uplo specifies whether the matrix is an upper or
+ *             lower triangular matrix as follows:
+ *                uplo = 'U' or 'u'   A is an upper triangular matrix.
+ *                uplo = 'L' or 'l'   A is a lower triangular matrix.
  *
  *   trans  - (input) char*
- *             On entry, trans specifies the equations to be solved as   
- *             follows:   
- *                trans = 'N' or 'n'   A*x = b.   
+ *             On entry, trans specifies the equations to be solved as
+ *             follows:
+ *                trans = 'N' or 'n'   A*x = b.
  *                trans = 'T' or 't'   A'*x = b.
- *                trans = 'C' or 'c'   A^H*x = b.   
+ *                trans = 'C' or 'c'   A^H*x = b.
  *
  *   diag   - (input) char*
- *             On entry, diag specifies whether or not A is unit   
- *             triangular as follows:   
- *                diag = 'U' or 'u'   A is assumed to be unit triangular.   
- *                diag = 'N' or 'n'   A is not assumed to be unit   
- *                                    triangular.   
- *	     
+ *             On entry, diag specifies whether or not A is unit
+ *             triangular as follows:
+ *                diag = 'U' or 'u'   A is assumed to be unit triangular.
+ *                diag = 'N' or 'n'   A is not assumed to be unit
+ *                                    triangular.
+ *
  *   L       - (input) SuperMatrix*
  *	       The factor L from the factorization Pr*A*Pc=L*U. Use
  *             compressed row subscripts storage for supernodes,
@@ -78,10 +78,10 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
  *   U       - (input) SuperMatrix*
  *	        The factor U from the factorization Pr*A*Pc=L*U.
  *	        U has types: Stype = NCP, Dtype = _C, Mtype = TRU.
- *    
+ *
  *   x       - (input/output) complex*
- *             Before entry, the incremented array X must contain the n   
- *             element right-hand side vector b. On exit, X is overwritten 
+ *             Before entry, the incremented array X must contain the n
+ *             element right-hand side vector b. On exit, X is overwritten
  *             with the solution vector x.
  *
  *   info    - (output) int_t*
@@ -94,12 +94,12 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
     SCPformat *Lstore;
     NCPformat *Ustore;
     complex   *Lval, *Uval;
-    int incx = 1, incy = 1;
+    int_t incx = 1, incy = 1;
     complex temp;
     complex alpha = {1.0, 0.0}, beta = {1.0, 0.0};
     complex comp_zero = {0.0, 0.0};
     register int_t fsupc, luptr, istart, irow, k, iptr, jcol, nsuper;
-    int          nsupr, nsupc, nrow, i;
+    int_t          nsupr, nsupc, nrow, i;
     complex *work;
     flops_t solve_ops;
 
@@ -125,13 +125,13 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
     if ( !(work = complexCalloc(L->nrow)) )
 	SUPERLU_ABORT("Malloc fails for work in sp_ctrsv().");
-    
+
     if ( lsame_(trans, "N") ) {	/* Form x := inv(A)*x. */
-	
+
 	if ( lsame_(uplo, "L") ) {
 	    /* Form x := inv(L)*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
-	    
+
 	    for (k = 0; k <= nsuper; k++) {
 		fsupc = L_FST_SUPC(k);
 		istart = L_SUB_START(fsupc);
@@ -160,23 +160,23 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
 		    CTRSV(ftcs1, ftcs2, ftcs3, &nsupc, &Lval[luptr], &nsupr,
 		       	&x[fsupc], &incx);
-		
-		    CGEMV(ftcs2, &nrow, &nsupc, &alpha, &Lval[luptr+nsupc], 
+
+		    CGEMV(ftcs2, &nrow, &nsupc, &alpha, &Lval[luptr+nsupc],
 		       	&nsupr, &x[fsupc], &incx, &beta, &work[0], &incy);
 #else
 		    ctrsv_("L", "N", "U", &nsupc, &Lval[luptr], &nsupr,
 		       	&x[fsupc], &incx);
-		
-		    cgemv_("N", &nrow, &nsupc, &alpha, &Lval[luptr+nsupc], 
+
+		    cgemv_("N", &nrow, &nsupc, &alpha, &Lval[luptr+nsupc],
 		       	&nsupr, &x[fsupc], &incx, &beta, &work[0], &incy);
 #endif
 #else
 		    clsolve (nsupr, nsupc, &Lval[luptr], &x[fsupc]);
-		
+
 		    cmatvec (nsupr, nsupr-nsupc, nsupc, &Lval[luptr+nsupc],
                              &x[fsupc], &work[0] );
-#endif		
-		
+#endif
+
 		    iptr = istart + nsupc;
 		    for (i = 0; i < nrow; ++i, ++iptr) {
 			irow = L_SUB(iptr);
@@ -186,18 +186,18 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    }
 	 	}
 	    } /* for k ... */
-	    
+
 	} else {
 	    /* Form x := inv(U)*x */
-	    
+
 	    if ( U->nrow == 0 ) return 0; /* Quick return */
-	    
+
 	    for (k = nsuper; k >= 0; k--) {
 	    	fsupc = L_FST_SUPC(k);
                 nsupr = L_SUB_END(fsupc) - L_SUB_START(fsupc);
                 nsupc = L_LAST_SUPC(k) - fsupc;
 	    	luptr = L_NZ_START(fsupc);
-		
+
                 /* 1 c_div costs 10 flops */
     	        solve_ops += 4 * nsupc * (nsupc + 1) + 10 * nsupc;
 
@@ -221,9 +221,9 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 		    ctrsv_("U", "N", "N", &nsupc, &Lval[luptr], &nsupr,
                            &x[fsupc], &incx);
 #endif
-#else		
+#else
 		    cusolve ( nsupr, nsupc, &Lval[luptr], &x[fsupc] );
-#endif		
+#endif
 
                     for (jcol = fsupc; jcol < fsupc + nsupc; jcol++) {
 		        solve_ops += 8*(U_NZ_END(jcol) - U_NZ_START(jcol));
@@ -235,14 +235,14 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
                     }
 		}
 	    } /* for k ... */
-	    
+
 	}
     } else if ( lsame_(trans, "T") ) { /* Form x := inv(A')*x */
-	
+
 	if ( lsame_(uplo, "L") ) {
 	    /* Form x := inv(L')*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
-	    
+
 	    for (k = Lstore->nsuper; k >= 0; --k) {
 	    	fsupc = L_FST_SUPC(k);
 	    	istart = L_SUB_START(fsupc);
@@ -254,7 +254,7 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
 		for (jcol = fsupc; jcol < L_LAST_SUPC(k); jcol++) {
 		    iptr = istart + nsupc;
-		    for (i = L_NZ_START(jcol) + nsupc; 
+		    for (i = L_NZ_START(jcol) + nsupc;
 				i < L_NZ_END(jcol); i++) {
 			irow = L_SUB(iptr);
 			cc_mult(&comp_zero, &x[irow], &Lval[i]);
@@ -262,7 +262,7 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 			iptr++;
 		    }
 		}
-		
+
 		if ( nsupc > 1 ) {
 		    solve_ops += 4 * nsupc * (nsupc - 1);
 #ifdef _CRAY
@@ -280,7 +280,7 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	} else {
 	    /* Form x := inv(U')*x */
 	    if ( U->nrow == 0 ) return 0; /* Quick return */
-	    
+
 	    for (k = 0; k <= nsuper; k++) {
 	    	fsupc = L_FST_SUPC(k);
                 nsupr = L_SUB_END(fsupc) - L_SUB_START(fsupc);
@@ -316,11 +316,11 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	    } /* for k ... */
 	}
     } else { /* Form x := conj(inv(A'))*x */
-	
+
 	if ( lsame_(uplo, "L") ) {
 	    /* Form x := conj(inv(L'))*x */
     	    if ( L->nrow == 0 ) return 0; /* Quick return */
-	    
+
 	    for (k = Lstore->nsuper; k >= 0; --k) {
 	    	fsupc = L_FST_SUPC(k);
 	    	istart = L_SUB_START(fsupc);
@@ -332,7 +332,7 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
 		for (jcol = fsupc; jcol < L_FST_SUPC(k+1); jcol++) {
 		    iptr = istart + nsupc;
-		    for (i = L_NZ_START(jcol) + nsupc; 
+		    for (i = L_NZ_START(jcol) + nsupc;
 				i < L_NZ_START(jcol+1); i++) {
 			irow = L_SUB(iptr);
                         cc_conj(&temp, &Lval[i]);
@@ -341,7 +341,7 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 			iptr++;
 		    }
  		}
- 		
+
  		if ( nsupc > 1 ) {
 		    solve_ops += 4 * nsupc * (nsupc - 1);
 #ifdef _CRAY
@@ -359,7 +359,7 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	} else {
 	    /* Form x := conj(inv(U'))*x */
 	    if ( U->nrow == 0 ) return 0; /* Quick return */
-	    
+
 	    for (k = 0; k <= Lstore->nsuper; k++) {
 	    	fsupc = L_FST_SUPC(k);
 	    	nsupr = L_SUB_START(fsupc+1) - L_SUB_START(fsupc);
@@ -378,7 +378,7 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
                 /* 1 c_div costs 10 flops */
 		solve_ops += 4 * nsupc * (nsupc + 1) + 10 * nsupc;
- 
+
 		if ( nsupc == 1 ) {
                     cc_conj(&temp, &Lval[luptr]);
 		    c_div(&x[fsupc], &x[fsupc], &temp);
@@ -405,68 +405,68 @@ sp_ctrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
 
 int_t
-sp_cgemv(char *trans, complex alpha, SuperMatrix *A, complex *x, 
+sp_cgemv(char *trans, complex alpha, SuperMatrix *A, complex *x,
 	 int_t incx, complex beta, complex *y, int_t incy)
 {
-/*  Purpose   
-    =======   
+/*  Purpose
+    =======
 
-    sp_cgemv()  performs one of the matrix-vector operations   
-       y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,   
+    sp_cgemv()  performs one of the matrix-vector operations
+       y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,
     where alpha and beta are scalars, x and y are vectors and A is a
-    sparse A->nrow by A->ncol matrix.   
+    sparse A->nrow by A->ncol matrix.
 
-    Parameters   
-    ==========   
+    Parameters
+    ==========
 
     TRANS  - (input) char*
-             On entry, TRANS specifies the operation to be performed as   
-             follows:   
-                TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.   
-                TRANS = 'T' or 't'   y := alpha*A'*x + beta*y.   
-                TRANS = 'C' or 'c'   y := alpha*A'*x + beta*y.   
+             On entry, TRANS specifies the operation to be performed as
+             follows:
+                TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
+                TRANS = 'T' or 't'   y := alpha*A'*x + beta*y.
+                TRANS = 'C' or 'c'   y := alpha*A'*x + beta*y.
 
     ALPHA  - (input) complex
-             On entry, ALPHA specifies the scalar alpha.   
+             On entry, ALPHA specifies the scalar alpha.
 
     A      - (input) SuperMatrix*
-             Before entry, the leading m by n part of the array A must   
-             contain the matrix of coefficients.   
+             Before entry, the leading m by n part of the array A must
+             contain the matrix of coefficients.
 
-    X      - (input) complex*, array of DIMENSION at least   
-             ( 1 + ( n - 1 )*abs( INCX ) ) when TRANS = 'N' or 'n'   
-             and at least   
-             ( 1 + ( m - 1 )*abs( INCX ) ) otherwise.   
-             Before entry, the incremented array X must contain the   
-             vector x.   
+    X      - (input) complex*, array of DIMENSION at least
+             ( 1 + ( n - 1 )*abs( INCX ) ) when TRANS = 'N' or 'n'
+             and at least
+             ( 1 + ( m - 1 )*abs( INCX ) ) otherwise.
+             Before entry, the incremented array X must contain the
+             vector x.
 
     INCX   - (input) int
-             On entry, INCX specifies the increment for the elements of   
-             X. INCX must not be zero.   
+             On entry, INCX specifies the increment for the elements of
+             X. INCX must not be zero.
 
     BETA   - (input) complex
-             On entry, BETA specifies the scalar beta. When BETA is   
-             supplied as zero then Y need not be set on input.   
+             On entry, BETA specifies the scalar beta. When BETA is
+             supplied as zero then Y need not be set on input.
 
-    Y      - (output) complex*,  array of DIMENSION at least   
-             ( 1 + ( m - 1 )*abs( INCY ) ) when TRANS = 'N' or 'n'   
-             and at least   
-             ( 1 + ( n - 1 )*abs( INCY ) ) otherwise.   
-             Before entry with BETA non-zero, the incremented array Y   
-             must contain the vector y. On exit, Y is overwritten by the 
+    Y      - (output) complex*,  array of DIMENSION at least
+             ( 1 + ( m - 1 )*abs( INCY ) ) when TRANS = 'N' or 'n'
+             and at least
+             ( 1 + ( n - 1 )*abs( INCY ) ) otherwise.
+             Before entry with BETA non-zero, the incremented array Y
+             must contain the vector y. On exit, Y is overwritten by the
              updated vector y.
-	     
-    INCY   - (input) int
-             On entry, INCY specifies the increment for the elements of   
-             Y. INCY must not be zero.   
 
-    ==== Sparse Level 2 Blas routine.   
+    INCY   - (input) int
+             On entry, INCY specifies the increment for the elements of
+             Y. INCY must not be zero.
+
+    ==== Sparse Level 2 Blas routine.
 */
 
     /* Local variables */
     NCformat *Astore;
     complex   *Aval;
-    int info;
+    int_t info;
     complex temp, temp1;
     int_t lenx, leny, i, j, irow;
     int_t iy, jx, jy, kx, ky;
@@ -477,7 +477,7 @@ sp_cgemv(char *trans, complex alpha, SuperMatrix *A, complex *x,
     notran = lsame_(trans, "N");
     Astore = A->Store;
     Aval = Astore->nzval;
-    
+
     /* Test the input parameters */
     info = 0;
     if ( !notran && !lsame_(trans, "T") && !lsame_(trans, "C")) info = 1;
@@ -490,13 +490,13 @@ sp_cgemv(char *trans, complex alpha, SuperMatrix *A, complex *x,
     }
 
     /* Quick return if possible. */
-    if (A->nrow == 0 || A->ncol == 0 || 
-	c_eq(&alpha, &comp_zero) && 
+    if (A->nrow == 0 || A->ncol == 0 ||
+	c_eq(&alpha, &comp_zero) &&
 	c_eq(&beta, &comp_one))
 	return 0;
 
 
-    /* Set  LENX  and  LENY, the lengths of the vectors x and y, and set 
+    /* Set  LENX  and  LENY, the lengths of the vectors x and y, and set
        up the start points in  X  and  Y. */
     if (lsame_(trans, "N")) {
 	lenx = A->ncol;
@@ -510,7 +510,7 @@ sp_cgemv(char *trans, complex alpha, SuperMatrix *A, complex *x,
     if (incy > 0) ky = 0;
     else ky =  - (leny - 1) * incy;
 
-    /* Start the operations. In this version the elements of A are   
+    /* Start the operations. In this version the elements of A are
        accessed sequentially with one pass through A. */
     /* First form  y := beta*y. */
     if ( !c_eq(&beta, &comp_one) ) {
@@ -518,7 +518,7 @@ sp_cgemv(char *trans, complex alpha, SuperMatrix *A, complex *x,
 	    if ( c_eq(&beta, &comp_zero) )
 		for (i = 0; i < leny; ++i) y[i] = comp_zero;
 	    else
-		for (i = 0; i < leny; ++i) 
+		for (i = 0; i < leny; ++i)
 		  cc_mult(&y[i], &beta, &y[i]);
 	} else {
 	    iy = ky;
@@ -534,7 +534,7 @@ sp_cgemv(char *trans, complex alpha, SuperMatrix *A, complex *x,
 		}
 	}
     }
-    
+
     if ( c_eq(&alpha, &comp_zero) ) return 0;
 
     if ( notran ) {
@@ -574,6 +574,5 @@ sp_cgemv(char *trans, complex alpha, SuperMatrix *A, complex *x,
 	    SUPERLU_ABORT("Not implemented.");
 	}
     }
-    return 0;    
+    return 0;
 } /* sp_cgemv */
-

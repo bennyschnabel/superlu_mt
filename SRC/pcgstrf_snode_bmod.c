@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -29,7 +29,7 @@ pcgstrf_snode_bmod(
  * and Xerox Palo Alto Research Center.
  * September 10, 2007
  *
- * Performs numeric block updates within the relaxed supernode. 
+ * Performs numeric block updates within the relaxed supernode.
  */
 
     complex      zero = {0.0, 0.0};
@@ -39,14 +39,14 @@ pcgstrf_snode_bmod(
 #if ( MACH==CRAY_PVP )
     _fcd ftcs1, ftcs2, ftcs3;
 #endif
-#ifdef USE_VENDOR_BLAS    
-    int            incx = 1, incy = 1;
+#ifdef USE_VENDOR_BLAS
+    int_t            incx = 1, incy = 1;
     complex         alpha = none, beta = one;
 #endif
-    
+
     int_t            luptr;
-    int              nsupc, nsupr, nrow;
-    int_t            isub, irow, i, iptr; 
+    int_t              nsupc, nsupr, nrow;
+    int_t            isub, irow, i, iptr;
     register int_t   ufirst, nextlu;
     complex         *lusup;
     int_t            *lsub, *xlsub, *xlsub_end, *xlusup, *xlusup_end;
@@ -60,7 +60,7 @@ pcgstrf_snode_bmod(
     xlusup_end = Glu->xlusup_end;
 
     nextlu = xlusup[jcol];
-    
+
     /*
      *	Process the supernodal portion of L\U[*,j]
      */
@@ -72,7 +72,7 @@ pcgstrf_snode_bmod(
     }
 
     xlusup_end[jcol] = nextlu;
-    
+
     if ( fsupc < jcol ) {
 
 	luptr = xlusup[fsupc];
@@ -81,7 +81,7 @@ pcgstrf_snode_bmod(
 	ufirst = xlusup[jcol];	/* Points to the beginning of column
 				   jcol in supernode L\U(jsupno). */
 	nrow = nsupr - nsupc;
-	
+
 	Gstat->procstat[pnum].fcops += flopcnt;
 
 /*	ops[TRSV] += nsupc * (nsupc - 1);
@@ -92,19 +92,19 @@ pcgstrf_snode_bmod(
 	ftcs1 = _cptofcd("L", strlen("L"));
 	ftcs2 = _cptofcd("N", strlen("N"));
 	ftcs3 = _cptofcd("U", strlen("U"));
-	CTRSV( ftcs1, ftcs2, ftcs3, &nsupc, &lusup[luptr], &nsupr, 
+	CTRSV( ftcs1, ftcs2, ftcs3, &nsupc, &lusup[luptr], &nsupr,
 	      &lusup[ufirst], &incx );
-	CGEMV( ftcs2, &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr, 
+	CGEMV( ftcs2, &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr,
 	      &lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #else
-	ctrsv_( "L", "N", "U", &nsupc, &lusup[luptr], &nsupr, 
+	ctrsv_( "L", "N", "U", &nsupc, &lusup[luptr], &nsupr,
 	      &lusup[ufirst], &incx );
-	cgemv_( "N", &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr, 
+	cgemv_( "N", &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr,
 		&lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #endif
 #else
 	clsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
-	cmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc], 
+	cmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc],
 		 &lusup[ufirst], &tempv[0] );
 
         /* Scatter tempv[*] into lusup[*] */

@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -64,16 +64,16 @@ pzgstrf_bmod2D_mv2(
          ftcs3 = _cptofcd("U", strlen("U"));
 #endif
 #ifdef USE_VENDOR_BLAS
-    int          incx = 1, incy = 1;
+    int_t          incx = 1, incy = 1;
     doublecomplex       alpha = one, beta = zero;
 #endif
 
     doublecomplex       ukj, ukj1, ukj2;
     int_t          luptr, luptr1, luptr2;
-    int          segsze, nsupr32 = nsupr;
-    int          block_nrow;  /* no of rows in a block row */
+    int_t          segsze, nsupr32 = nsupr;
+    int_t          block_nrow;  /* no of rows in a block row */
     register int_t lptr; /* points to the row subscripts of a supernode */
-    int_t          kfnz, irow, no_zeros; 
+    int_t          kfnz, irow, no_zeros;
     register int_t isub, isub1, i, j;
     register int_t jj;	      /* index through each column in the panel */
     int_t          krep_ind;
@@ -92,12 +92,12 @@ pzgstrf_bmod2D_mv2(
     doublecomplex       *lusup;
     int_t          *xlusup;
     register float flopcnt;
-    
-#ifdef TIMING    
+
+#ifdef TIMING
     double *utime = Gstat->utime;
     double f_time;
-#endif    
-    
+#endif
+
     if ( first ) {
 	maxsuper = sp_ienv(3);
 	rowblk   = sp_ienv(4);
@@ -112,7 +112,7 @@ pzgstrf_bmod2D_mv2(
     lptr      = Glu->xlsub[fsupc];
     krep_ind  = lptr + nsupc - 1;
 
-    
+
     /* ---------------------------------------------------------------
      * Sequence through each column in the panel -- triangular solves.
      * The results of the triangular solves of all columns in the
@@ -126,23 +126,23 @@ pzgstrf_bmod2D_mv2(
     TriTmp    = tempv;
     col_marker= spa_marker;
     col_lsub  = panel_lsub;
-    
+
     for (jj = jcol; jj < jcol + w; ++jj, col_marker += n, col_lsub += n,
 	 repfnz_col += n, dense_col += n, TriTmp += ldaTmp ) {
 
 	kfnz = repfnz_col[krep];
 	if ( kfnz == EMPTY ) continue;	/* Skip any zero segment */
-	    
+
 	segsze = krep - kfnz + 1;
 	luptr = xlusup[fsupc];
 
         flopcnt = 4 * segsze * (segsze - 1) + 8 * nrow * segsze;
 	Gstat->procstat[pnum].fcops += flopcnt;
 
-#ifdef TIMING	    
+#ifdef TIMING
 	f_time = SuperLU_timer_();
 #endif
-	
+
 	/* Case 1: Update U-segment of size 1 -- col-col update */
 	if ( segsze == 1 ) {
 	    ukj = dense_col[lsub[krep_ind]];
@@ -152,16 +152,16 @@ pzgstrf_bmod2D_mv2(
                 zz_mult(&comp_temp, &ukj, &lusup[luptr]);
                 z_sub(&dense_col[irow], &dense_col[irow], &comp_temp);
 		++luptr;
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		if ( col_marker[irow] != jj ) {
 		    col_marker[irow] = jj;
 		    col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		}
-#endif		
+#endif
 	    }
 #ifdef TIMING
 	    utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 	} else if ( segsze <= 3 ) {
 	    ukj = dense_col[lsub[krep_ind]];
 	    ukj1 = dense_col[lsub[krep_ind - 1]];
@@ -178,16 +178,16 @@ pzgstrf_bmod2D_mv2(
                     zz_mult(&comp_temp1, &ukj1, &lusup[luptr1]);
                     z_add(&comp_temp, &comp_temp, &comp_temp1);
                     z_sub(&dense_col[irow], &dense_col[irow], &comp_temp);
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		    if ( col_marker[irow] != jj ) {
 			col_marker[irow] = jj;
 			col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		    }
-#endif		
+#endif
 		}
 #ifdef TIMING
 		utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 	    } else {
 		ukj2 = dense_col[lsub[krep_ind - 2]];
 		luptr2 = luptr1 - nsupr;
@@ -209,12 +209,12 @@ pzgstrf_bmod2D_mv2(
                     zz_mult(&comp_temp1, &ukj2, &lusup[luptr2]);
                     z_add(&comp_temp, &comp_temp, &comp_temp1);
                     z_sub(&dense_col[irow], &dense_col[irow], &comp_temp);
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		    if ( col_marker[irow] != jj ) {
 			col_marker[irow] = jj;
 			col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		    }
-#endif		
+#endif
 		}
 	    }
 #ifdef TIMING
@@ -233,26 +233,26 @@ pzgstrf_bmod2D_mv2(
 
 	    /* start effective triangle */
 	    luptr += nsupr * no_zeros + no_zeros;
-	    
-#ifdef TIMING	    
+
+#ifdef TIMING
 	    f_time = SuperLU_timer_();
 #endif
-	    
+
 #ifdef USE_VENDOR_BLAS
 #if ( MACH==CRAY_PVP )
-	    CTRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
+	    CTRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr],
 		   &nsupr32, TriTmp, &incx );
 #else
 	    ztrsv_( "L", "N", "U", &segsze, &lusup[luptr], &nsupr32, TriTmp, &incx );
 #endif
-#else		
+#else
 	    zlsolve ( (int_t) nsupr, (int_t) segsze, &lusup[luptr], TriTmp );
-#endif		
-#ifdef TIMING	    
+#endif
+#ifdef TIMING
 	    utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 	} /* else ... */
-	    
+
     }  /* for jj ... end tri-solves */
 
     /* --------------------------------------------------------
@@ -267,7 +267,7 @@ pzgstrf_bmod2D_mv2(
 	isub1 = lptr + nsupc + r_ind;
 	repfnz_col = repfnz;
 	twocols = 0;
-	
+
 	/* Sequence through each column in the panel -- matrix-vector */
 	for (jj = jcol; jj < jcol + w; ++jj, repfnz_col += n) {
 
@@ -277,7 +277,7 @@ pzgstrf_bmod2D_mv2(
 	    if ( segsze <= 3 ) continue;   /* skip unrolled cases */
 
 	    /* Now segsze >= 4 ... */
-	    
+
 	    if ( twocols == 1 ) { /* got two columns */
 		jj2[1] = jj;
 		twocols = 0;
@@ -287,17 +287,17 @@ pzgstrf_bmod2D_mv2(
 		    tri[j] = tempv + ldaTmp * (jj2[j] - jcol);
 		    matvec[j] = tri[j] + maxsuper;
 		}
-		
+
 		if ( kfnz2[0] < kfnz2[1] ) { /* First column is bigger */
 		    no_zeros = kfnz2[0] - fsupc;
 		    segsze = kfnz2[1] - kfnz2[0];
 		    luptr = luptr1 + nsupr * no_zeros;
 #ifdef USE_VENDOR_BLAS
 #if ( MACH==CRAY_PVP )
-		    CGEMV( ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr], 
+		    CGEMV( ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr],
 			   &nsupr32, tri[0], &incx, &beta, matvec[0], &incy );
 #else
-		    zgemv_( "N", &block_nrow, &segsze, &alpha, &lusup[luptr], 
+		    zgemv_( "N", &block_nrow, &segsze, &alpha, &lusup[luptr],
 			   &nsupr32, tri[0], &incx, &beta, matvec[0], &incy );
 #endif
 #else
@@ -310,10 +310,10 @@ pzgstrf_bmod2D_mv2(
 		    luptr = luptr1 + nsupr * no_zeros;
 #ifdef USE_VENDOR_BLAS
 #if ( MACH==CRAY_PVP )
-		    CGEMV( ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr], 
+		    CGEMV( ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr],
 			   &nsupr, tri[1], &incx, &beta, matvec[1], &incy );
 #else
-		    zgemv_( "N", &block_nrow, &segsze, &alpha, &lusup[luptr], 
+		    zgemv_( "N", &block_nrow, &segsze, &alpha, &lusup[luptr],
 			   &nsupr32, tri[1], &incx, &beta, matvec[1], &incy );
 #endif
 #else
@@ -321,7 +321,7 @@ pzgstrf_bmod2D_mv2(
 			     tri[1], matvec[1]);
 #endif
 		}
-		
+
 		/* Do matrix-vector multiply with two destinations */
 		kfnz = SUPERLU_MAX( kfnz2[0], kfnz2[1] );
 		no_zeros = kfnz - fsupc;
@@ -343,7 +343,7 @@ pzgstrf_bmod2D_mv2(
 
 #ifdef TIMING
 		utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 		/* end for two destination update */
 	    } else { /* wait for a second column */
 		jj2[0] = jj;
@@ -360,13 +360,13 @@ pzgstrf_bmod2D_mv2(
 	    no_zeros = kfnz - fsupc;
 	    segsze = krep - kfnz + 1;
 	    luptr = luptr1 + nsupr * no_zeros;
-	    
+
 #ifdef USE_VENDOR_BLAS
 #if ( MACH==CRAY_PVP )
-	    CGEMV( ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr], 
+	    CGEMV( ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr],
 		   &nsupr, tri[0], &incx, &beta, matvec[0], &incy );
 #else
-	    zgemv_( "N", &block_nrow, &segsze, &alpha, &lusup[luptr], 
+	    zgemv_( "N", &block_nrow, &segsze, &alpha, &lusup[luptr],
 		   &nsupr32, tri[0], &incx, &beta, matvec[0], &incy );
 #endif
 #else
@@ -374,7 +374,7 @@ pzgstrf_bmod2D_mv2(
 		    tri[0], matvec[0]);
 #endif
 	} /* if twocols == 1 */
-    
+
 	/* Scatter matvec[*] into SPA dense[*]. */
 	repfnz_col = repfnz;
 	dense_col = dense;
@@ -393,20 +393,20 @@ pzgstrf_bmod2D_mv2(
 		irow = lsub[isub];
                 z_sub(&dense_col[irow], &dense_col[irow],
                               &matvec[0][i]); /* Scatter-add */
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		if ( col_marker[irow] != jj ) {
 		    col_marker[irow] = jj;
 		    col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		}
-#endif		
+#endif
 		matvec[0][i] = zero;
 		++isub;
 	    }
 	} /* for jj ... */
-	
+
     } /* for each block row ... */
 
-    
+
     /* ------------------------------------------------
        Scatter the triangular solves into SPA dense[*].
        ------------------------------------------------ */
@@ -419,8 +419,8 @@ pzgstrf_bmod2D_mv2(
 	if ( kfnz == EMPTY ) continue; /* skip any zero segment */
 	segsze = krep - kfnz + 1;
 	if ( segsze <= 3 ) continue;   /* skip unrolled cases */
-	
-	no_zeros = kfnz - fsupc;		
+
+	no_zeros = kfnz - fsupc;
 	isub = lptr + no_zeros;
 	for (i = 0; i < segsze; i++) {
 	    irow = lsub[isub];
@@ -429,5 +429,5 @@ pzgstrf_bmod2D_mv2(
 	    ++isub;
 	}
     } /* for jj ... */
-	
+
 }

@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -58,7 +58,7 @@ psgstrf_bmod2D(
          ftcs3 = _cptofcd("U", strlen("U"));
 #endif
 #ifdef USE_VENDOR_BLAS
-    int          incx = 1, incy = 1;
+    int_t          incx = 1, incy = 1;
     float      alpha, beta;
 #endif
     float      zero = 0.0;
@@ -66,10 +66,10 @@ psgstrf_bmod2D(
 
     float       ukj, ukj1, ukj2;
     int_t          luptr, luptr1, luptr2;
-    int          segsze, nsupr32 = nsupr;
-    int          block_nrow;  /* no of rows in a block row */
+    int_t          segsze, nsupr32 = nsupr;
+    int_t          block_nrow;  /* no of rows in a block row */
     register int_t lptr;   /* point_ts to the row subscripts of a supernode */
-    int_t          kfnz, irow, no_zeros; 
+    int_t          kfnz, irow, no_zeros;
     register int_t isub, isub1, i;
     register int_t jj;	      /* index through each column in the panel */
     int_t          krep_ind;
@@ -85,12 +85,12 @@ psgstrf_bmod2D(
     float       *lusup;
     int_t          *xlusup;
     register float flopcnt;
-    
-#ifdef TIMING    
+
+#ifdef TIMING
     double *utime = Gstat->utime;
     double f_time;
-#endif    
-    
+#endif
+
     if ( first ) {
 	maxsuper = sp_ienv(3);
 	rowblk   = sp_ienv(4);
@@ -109,8 +109,8 @@ psgstrf_bmod2D(
     TriTmp    = tempv;
     col_marker= spa_marker;
     col_lsub  = panel_lsub;
-	
-	
+
+
     /* ---------------------------------------------------------------
      * Sequence through each column in the panel -- triangular solves.
      * The results of the triangular solves of all columns in the
@@ -124,7 +124,7 @@ psgstrf_bmod2D(
 
 	kfnz = repfnz_col[krep];
 	if ( kfnz == EMPTY ) continue;	/* Skip any zero segment */
-	    
+
 	segsze = krep - kfnz + 1;
 	luptr = xlusup[fsupc];
 
@@ -133,11 +133,11 @@ psgstrf_bmod2D(
 
 /*	ops[TRSV] += segsze * (segsze - 1);
 	ops[GEMV] += 2 * nrow * segsze;        */
-	
-#ifdef TIMING	    
+
+#ifdef TIMING
 	f_time = SuperLU_timer_();
 #endif
-	
+
 	/* Case 1: Update U-segment of size 1 -- col-col update */
 	if ( segsze == 1 ) {
 	    ukj = dense_col[lsub[krep_ind]];
@@ -146,16 +146,16 @@ psgstrf_bmod2D(
 		irow = lsub[i];
                 dense_col[irow] -= ukj * lusup[luptr];
 		++luptr;
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		if ( col_marker[irow] != jj ) {
 		    col_marker[irow] = jj;
 		    col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		}
-#endif		
+#endif
 	    }
 #ifdef TIMING
 	    utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 	} else if ( segsze <= 3 ) {
 	    ukj = dense_col[lsub[krep_ind]];
 	    ukj1 = dense_col[lsub[krep_ind - 1]];
@@ -169,16 +169,16 @@ psgstrf_bmod2D(
 		    luptr++; luptr1++;
                     dense_col[irow] -= (ukj * lusup[luptr]
                                                 + ukj1 * lusup[luptr1]);
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		    if ( col_marker[irow] != jj ) {
 			col_marker[irow] = jj;
 			col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		    }
-#endif		
+#endif
 		}
 #ifdef TIMING
 		utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 	    } else {
 		ukj2 = dense_col[lsub[krep_ind - 2]];
 		luptr2 = luptr1 - nsupr;
@@ -191,12 +191,12 @@ psgstrf_bmod2D(
 		    luptr++; luptr1++; luptr2++;
                     dense_col[irow] -= (ukj * lusup[luptr]
                              + ukj1*lusup[luptr1] + ukj2*lusup[luptr2]);
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		    if ( col_marker[irow] != jj ) {
 			col_marker[irow] = jj;
 			col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		    }
-#endif		
+#endif
 		}
 	    }
 #ifdef TIMING
@@ -215,28 +215,28 @@ psgstrf_bmod2D(
 
 	    /* start effective triangle */
 	    luptr += nsupr * no_zeros + no_zeros;
-	    
-#ifdef TIMING	    
+
+#ifdef TIMING
 	    f_time = SuperLU_timer_();
 #endif
-	    
+
 #ifdef USE_VENDOR_BLAS
 #if ( MACH==CRAY_PVP )
-	    STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
+	    STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr],
 		   &nsupr32, TriTmp, &incx );
 #else
-	    strsv_( "L", "N", "U", &segsze, &lusup[luptr], 
+	    strsv_( "L", "N", "U", &segsze, &lusup[luptr],
 		   &nsupr32, TriTmp, &incx );
 #endif
-#else		
+#else
 	    slsolve ( nsupr, segsze, &lusup[luptr], TriTmp );
 #endif
-		
-#ifdef TIMING	    
+
+#ifdef TIMING
 	    utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 	} /* else ... */
-	    
+
     }  /* for jj ... end tri-solves */
 
     /* --------------------------------------------------------
@@ -245,97 +245,97 @@ psgstrf_bmod2D(
      * --------------------------------------------------------
      */
     for ( r_ind = 0; r_ind < nrow; r_ind += rowblk ) {
-	    
+
 	r_hi = SUPERLU_MIN(nrow, r_ind + rowblk);
 	block_nrow = SUPERLU_MIN(rowblk, r_hi - r_ind);
 	luptr = xlusup[fsupc] + nsupc + r_ind;
 	isub1 = lptr + nsupc + r_ind;
-	    
+
 	repfnz_col = repfnz;
 	TriTmp = tempv;
 	dense_col = dense;
 	col_marker= spa_marker;
 	col_lsub  = panel_lsub;
-	
+
 	/* Sequence through each column in the panel -- matrix-vector */
 	for (jj = jcol; jj < jcol + w; ++jj, col_marker += m, col_lsub += m,
 	     repfnz_col += m, dense_col += m, TriTmp += ldaTmp) {
 
 	    kfnz = repfnz_col[krep];
 	    if ( kfnz == EMPTY ) continue; /* skip any zero segment */
-	    
+
 	    segsze = krep - kfnz + 1;
 	    if ( segsze <= 3 ) continue;   /* skip unrolled cases */
-		
+
 	    /* Perform a block update, and scatter the result of
 	       matrix-vector into SPA dense[*].		 */
 	    no_zeros = kfnz - fsupc;
 	    luptr1 = luptr + nsupr * no_zeros;
 	    MatvecTmp = &TriTmp[maxsuper];
-	    
+
 #ifdef TIMING
 	    f_time = SuperLU_timer_();
-#endif	    
-	    
+#endif
+
 #ifdef USE_VENDOR_BLAS
             alpha = one;
             beta = zero;
 #if ( MACH==CRAY_PVP )
-	    SGEMV( ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr], 
+	    SGEMV( ftcs2, &block_nrow, &segsze, &alpha, &lusup[luptr],
 		  &nsupr32, TriTmp, &incx, &beta, MatvecTmp, &incy );
 #else
-	    sgemv_( "N", &block_nrow, &segsze, &alpha, &lusup[luptr1], 
+	    sgemv_( "N", &block_nrow, &segsze, &alpha, &lusup[luptr1],
 		   &nsupr32, TriTmp, &incx, &beta, MatvecTmp, &incy );
 #endif /* _CRAY_PVP */
 #else
 	    smatvec( nsupr, (int_t) block_nrow, (int_t) segsze, &lusup[luptr1],
 		    TriTmp, MatvecTmp);
 #endif
-		
+
 #ifdef TIMING
 	    utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 
 	    /* Scatter MatvecTmp[*] into SPA dense[*] temporarily,
 	     * such that MatvecTmp[*] can be re-used for the
-	     * the next block row update. dense[] will be copied into 
+	     * the next block row update. dense[] will be copied into
 	     * global store after the whole panel has been finished.
 	     */
 	    isub = isub1;
 	    for (i = 0; i < block_nrow; i++) {
 		irow = lsub[isub];
                 dense_col[irow] -= MatvecTmp[i]; /* Scatter-add */
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		if ( col_marker[irow] != jj ) {
 		    col_marker[irow] = jj;
 		    col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		}
-#endif		
+#endif
 		MatvecTmp[i] = zero;
 		++isub;
 	    }
-	    
+
 	} /* for jj ... */
 
     } /* for each block row ... */
 
-    
+
     /* ------------------------------------------------
        Scatter the triangular solves into SPA dense[*].
        ------------------------------------------------ */
     repfnz_col = repfnz;
     TriTmp = tempv;
     dense_col = dense;
-    
-    for (jj = 0; jj < w; ++jj, repfnz_col += m, dense_col += m, 
+
+    for (jj = 0; jj < w; ++jj, repfnz_col += m, dense_col += m,
 	 TriTmp += ldaTmp) {
 	kfnz = repfnz_col[krep];
 	if ( kfnz == EMPTY ) continue; /* skip any zero segment */
-	
+
 	segsze = krep - kfnz + 1;
 	if ( segsze <= 3 ) continue; /* skip unrolled cases */
-	
-	no_zeros = kfnz - fsupc;		
+
+	no_zeros = kfnz - fsupc;
 	isub = lptr + no_zeros;
 	for (i = 0; i < segsze; i++) {
 	    irow = lsub[isub];
@@ -344,5 +344,5 @@ psgstrf_bmod2D(
 	    ++isub;
 	}
     } /* for jj ... */
-	
+
 }

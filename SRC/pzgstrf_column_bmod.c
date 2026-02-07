@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -54,13 +54,13 @@ pzgstrf_column_bmod(
          ftcs2 = _cptofcd("N", strlen("N")),
          ftcs3 = _cptofcd("U", strlen("U"));
 #endif
-    
-#ifdef USE_VENDOR_BLAS    
-    int         incx = 1, incy = 1;
+
+#ifdef USE_VENDOR_BLAS
+    int_t         incx = 1, incy = 1;
     doublecomplex      alpha, beta;
 #endif
     GlobalLU_t *Glu = pxgstrf_shared->Glu;   /* modified */
-    
+
     /* krep = representative of current k-th supernode
      * fsupc = first supernodal column
      * nsupc = no of columns in supernode
@@ -73,8 +73,8 @@ pzgstrf_column_bmod(
     register int_t lptr, kfnz, isub, irow, i, no_zeros;
     register int_t luptr, luptr1, luptr2;
     int_t          fsupc;
-    int          nsupc, nsupr, segsze;
-    int          nrow; /* No of rows in the matrix of matrix-vector */
+    int_t          nsupc, nsupr, segsze;
+    int_t          nrow; /* No of rows in the matrix of matrix-vector */
     int_t          jsupno, k, ksub, krep, krep_ind, ksupno;
     int_t          ufirst, nextlu;
     int_t          fst_col; /* First column within small LU update */
@@ -103,8 +103,8 @@ pzgstrf_column_bmod(
     xlusup_end = Glu->xlusup_end;
     jsupno     = supno[jcol];
 
-    /* 
-     * For each nonz supernode segment of U[*,j] in topological order 
+    /*
+     * For each nonz supernode segment of U[*,j] in topological order
      */
     k = nseg - 1;
     for (ksub = 0; ksub < nseg; ksub++) {
@@ -116,15 +116,15 @@ pzgstrf_column_bmod(
 if (jcol==BADCOL)
 printf("(%d) pzgstrf_column_bmod[1]: %d, nseg %d, krep %d, jsupno %d, ksupno %d\n",
        pnum, jcol, nseg, krep, jsupno, ksupno);
-#endif    
+#endif
 	if ( jsupno != ksupno ) { /* Outside the rectangular supernode */
 
 	    fsupc = xsup[ksupno];
 	    fst_col = SUPERLU_MAX ( fsupc, fpanelc );
 
-  	    /* Distance from the current supernode to the current panel; 
+  	    /* Distance from the current supernode to the current panel;
 	       d_fsupc=0 if fsupc >= fpanelc. */
-  	    d_fsupc = fst_col - fsupc; 
+  	    d_fsupc = fst_col - fsupc;
 
 	    luptr = xlusup[fst_col] + d_fsupc;
 	    lptr = xlsub[fsupc] + d_fsupc;
@@ -140,7 +140,7 @@ printf("(%d) pzgstrf_column_bmod[1]: %d, nseg %d, krep %d, jsupno %d, ksupno %d\
 	    Gstat->procstat[pnum].fcops += flopcnt;
 
 #if ( DEBUGlevel>=2 )
-if (jcol==BADCOL)	    
+if (jcol==BADCOL)
 printf("(%d) pzgstrf_column_bmod[2]: %d, krep %d, kfnz %d, segsze %d, d_fsupc %d,\
 fsupc %d, nsupr %d, nsupc %d\n",
        pnum, jcol, krep, kfnz, segsze, d_fsupc, fsupc, nsupr, nsupc);
@@ -223,29 +223,29 @@ fsupc %d, nsupr %d, nsupc %d\n",
 	        for (i = 0; i < segsze; i++) {
 	  	    irow = lsub[isub];
 		    tempv[i] = dense[irow];
-		    ++isub; 
+		    ++isub;
 	        }
 
 	        /* Dense triangular solve -- start effective triangle */
-		luptr += nsupr * no_zeros + no_zeros; 
+		luptr += nsupr * no_zeros + no_zeros;
 #ifdef USE_VENDOR_BLAS
 #if ( MACH==CRAY_PVP )
-		CTRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
+		CTRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr],
 		       &nsupr, tempv, &incx );
 #else
-		ztrsv_( "L", "N", "U", &segsze, &lusup[luptr], 
+		ztrsv_( "L", "N", "U", &segsze, &lusup[luptr],
 		       &nsupr, tempv, &incx );
 #endif
-		
+
  		luptr += segsze;  /* Dense matrix-vector */
 		tempv1 = &tempv[segsze];
 		alpha = one;
 		beta = zero;
 #if ( MACH==CRAY_PVP )
-		CGEMV( ftcs2, &nrow, &segsze, &alpha, &lusup[luptr], 
+		CGEMV( ftcs2, &nrow, &segsze, &alpha, &lusup[luptr],
 		       &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #else
-		zgemv_( "N", &nrow, &segsze, &alpha, &lusup[luptr], 
+		zgemv_( "N", &nrow, &segsze, &alpha, &lusup[luptr],
 		       &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #endif
 #else
@@ -272,24 +272,24 @@ fsupc %d, nsupr %d, nsupc %d\n",
 		    ++isub;
 		}
 	    } /* else segsze >= 4 */
-	    
+
 	} /* if jsupno ... */
 
     } /* for each segment... */
 
-    
+
     /* ------------------------------------------
        Process the supernodal portion of L\U[*,j]
        ------------------------------------------ */
-    
+
     fsupc = SUPER_FSUPC (jsupno);
     nsupr = xlsub_end[fsupc] - xlsub[fsupc];
-    if ( (mem_error = Glu_alloc(pnum, jcol, nsupr, LUSUP, &nextlu, 
+    if ( (mem_error = Glu_alloc(pnum, jcol, nsupr, LUSUP, &nextlu,
 			       pxgstrf_shared)) )
 	return mem_error;
     xlusup[jcol] = nextlu;
     lusup = Glu->lusup;
-    
+
     /* Gather the nonzeros from SPA dense[*,j] into L\U[*,j] */
     for (isub = xlsub[fsupc]; isub < xlsub_end[fsupc]; ++isub) {
   	irow = lsub[isub];
@@ -299,7 +299,7 @@ fsupc %d, nsupr %d, nsupc %d\n",
 if (jcol == -1)
     printf("(%d) pzgstrf_column_bmod[lusup] jcol %d, irow %d, lusup %.10e\n",
 	   pnum, jcol, irow, lusup[nextlu]);
-#endif	
+#endif
 	++nextlu;
     }
     xlusup_end[jcol] = nextlu; /* close L\U[*,jcol] */
@@ -310,11 +310,11 @@ if (jcol == -1) {
     print_double_vec("before sup-col update", nrow, &lsub[xlsub[fsupc]],
 		     &lusup[xlusup[jcol]]);
 }
-#endif    
-    
+#endif
+
     /*
-     * For more updates within the panel (also within the current supernode), 
-     * should start from the first column of the panel, or the first column 
+     * For more updates within the panel (also within the current supernode),
+     * should start from the first column of the panel, or the first column
      * of the supernode, whichever is bigger. There are 2 cases:
      *    (1) fsupc < fpanelc,  then fst_col := fpanelc
      *    (2) fsupc >= fpanelc, then fst_col := fsupc
@@ -334,29 +334,29 @@ if (jcol == -1) {
 	nrow = nsupr - d_fsupc - nsupc;
 
 	/* points to the beginning of jcol in supernode L\U[*,jsupno] */
-	ufirst = xlusup[jcol] + d_fsupc;	
+	ufirst = xlusup[jcol] + d_fsupc;
 
 #if ( DEBUGlevel>=2 )
 if (jcol==BADCOL)
 printf("(%d) pzgstrf_column_bmod[3] jcol %d, fsupc %d, nsupr %d, nsupc %d, nrow %d\n",
        pnum, jcol, fsupc, nsupr, nsupc, nrow);
-#endif    
+#endif
 
         flopcnt = 4 * nsupc * (nsupc - 1) + 8 * nrow * nsupc;
 	Gstat->procstat[pnum].fcops += flopcnt;
 
 /*	ops[TRSV] += nsupc * (nsupc - 1);
 	ops[GEMV] += 2 * nrow * nsupc;    */
-	
+
 #ifdef USE_VENDOR_BLAS
 	alpha = none; beta = one; /* y := beta*y + alpha*A*x */
 #if ( MACH==CRAY_PVP )
-	CTRSV( ftcs1, ftcs2, ftcs3, &nsupc, &lusup[luptr], 
+	CTRSV( ftcs1, ftcs2, ftcs3, &nsupc, &lusup[luptr],
 	       &nsupr, &lusup[ufirst], &incx );
 	CGEMV( ftcs2, &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr,
 	       &lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #else
-	ztrsv_( "L", "N", "U", &nsupc, &lusup[luptr], 
+	ztrsv_( "L", "N", "U", &nsupc, &lusup[luptr],
 	       &nsupr, &lusup[ufirst], &incx );
 	zgemv_( "N", &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr,
 	       &lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
@@ -366,7 +366,7 @@ printf("(%d) pzgstrf_column_bmod[3] jcol %d, fsupc %d, nsupr %d, nsupc %d, nrow 
 
 	zmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc],
 		 &lusup[ufirst], tempv );
-	
+
         /* Copy updates from tempv[*] into lusup[*] */
 	isub = ufirst + nsupc;
 	for (i = 0; i < nrow; i++) {
@@ -375,7 +375,7 @@ printf("(%d) pzgstrf_column_bmod[3] jcol %d, fsupc %d, nsupr %d, nsupc %d, nrow 
 	    ++isub;
 	}
 #endif
-    } /* if fst_col < jcol ... */ 
+    } /* if fst_col < jcol ... */
 
     return 0;
 }

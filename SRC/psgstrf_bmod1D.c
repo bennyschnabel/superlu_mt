@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -22,12 +22,12 @@ psgstrf_bmod1D(
 	       const int_t m,     /* number of rows in the matrix */
 	       const int_t w,     /* current panel width */
 	       const int_t jcol,  /* leading column of the current panel */
-	       const int_t fsupc, /* leading column of the updating supernode */ 
-	       const int_t krep,  /* last column of the updating supernode */ 
-	       const int_t nsupc, /* number of columns in the updating s-node */ 
-	       int_t nsupr, /* number of rows in the updating supernode */  
+	       const int_t fsupc, /* leading column of the updating supernode */
+	       const int_t krep,  /* last column of the updating supernode */
+	       const int_t nsupc, /* number of columns in the updating s-node */
+	       int_t nsupr, /* number of rows in the updating supernode */
 	       int_t nrow,  /* number of rows below the diagonal block of
-			     the updating supernode */ 
+			     the updating supernode */
 	       int_t *repfnz,     /* in */
 	       int_t *panel_lsub, /* modified */
 	       int_t *w_lsub_end, /* modified */
@@ -58,13 +58,13 @@ psgstrf_bmod1D(
          ftcs3 = _cptofcd("U", strlen("U"));
 #endif
 #ifdef USE_VENDOR_BLAS
-    int          incx = 1, incy = 1;
+    int_t          incx = 1, incy = 1;
     float       alpha, beta;
 #endif
 
     float       ukj, ukj1, ukj2;
     int_t          luptr, luptr1, luptr2;
-    int            segsze, nrow32 = nrow, nsupr32 = nsupr;
+    int_t            segsze, nrow32 = nrow, nsupr32 = nsupr;
     register int_t lptr; /* start of row subscripts of the updating supernode */
     register int_t i, krep_ind, kfnz, isub, irow, no_zeros;
     register int_t jj;	      /* index through each column in the panel */
@@ -80,12 +80,12 @@ psgstrf_bmod1D(
 
     float      zero = 0.0;
     float      one = 1.0;
-    
+
 #ifdef TIMING
     double *utime = Gstat->utime;
     double f_time;
-#endif    
-    
+#endif
+
     lsub      = Glu->lsub;
     xlsub_end = Glu->xlsub_end;
     lusup     = Glu->lusup;
@@ -104,9 +104,9 @@ if (jcol == BADPAN && krep == BADREP) {
     printf("(%d) psgstrf_bmod1D[1] jcol %d, fsupc %d, krep %d, nsupc %d, nsupr %d, nrow %d\n",
 	   pnum, jcol, fsupc, krep, nsupc, nsupr, nrow);
     PrintInt10("lsub[xlsub[2774]]", nsupr, &lsub[lptr]);
-}    
+}
 #endif
-    
+
     /*
      * Sequence through each column in the panel ...
      */
@@ -127,7 +127,7 @@ if (jcol == BADPAN && krep == BADREP) {
 	if ( segsze == 1 ) {
 #ifdef TIMING
 	    f_time = SuperLU_timer_();
-#endif	    
+#endif
 	    ukj = dense_col[lsub[krep_ind]];
 	    luptr += nsupr*(nsupc-1) + nsupc;
 #if ( DEBUGlevel>=2 )
@@ -136,25 +136,25 @@ if (krep == BADCOL && jj == -1) {
 	   pnum, lsub[krep_ind], jj, ukj);
     PrintInt10("segsze=1", nsupr, &lsub[lptr]);
 }
-#endif	    
+#endif
 	    for (i = lptr + nsupc; i < xlsub_end[fsupc]; i++) {
 		irow = lsub[i];
                         dense_col[irow] -= ukj * lusup[luptr];
 		++luptr;
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		if ( col_marker[irow] != jj ) {
 		    col_marker[irow] = jj;
 		    col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		}
-#endif		
+#endif
 	    }
 #ifdef TIMING
 	    utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 	} else if ( segsze <= 3 ) {
 #ifdef TIMING
 	    f_time = SuperLU_timer_();
-#endif	    
+#endif
 	    ukj = dense_col[lsub[krep_ind]];
 	    luptr += nsupr*(nsupc-1) + nsupc-1;
 	    ukj1 = dense_col[lsub[krep_ind - 1]];
@@ -167,12 +167,12 @@ if (krep == BADCOL && jj == -1) {
 		    ++luptr;  ++luptr1;
                             dense_col[irow] -= (ukj * lusup[luptr]
                                                 + ukj1 * lusup[luptr1]);
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		    if ( col_marker[irow] != jj ) {
 			col_marker[irow] = jj;
 			col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		    }
-#endif		
+#endif
 		}
 	    } else {
 		ukj2 = dense_col[lsub[krep_ind - 2]];
@@ -186,25 +186,25 @@ if (krep == BADCOL && jj == -1) {
 		    ++luptr; ++luptr1; ++luptr2;
                     dense_col[irow] -= (ukj * lusup[luptr]
                              + ukj1*lusup[luptr1] + ukj2*lusup[luptr2]);
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		    if ( col_marker[irow] != jj ) {
 			col_marker[irow] = jj;
 			col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		    }
-#endif		
+#endif
 		}
 	    }
 #ifdef TIMING
 	    utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 	} else { /* segsze >= 4 */
-	    /* 
+	    /*
 	     * Perform a triangular solve and matrix-vector update,
 	     * then scatter the result of sup-col update to dense[*].
 	     */
 	    no_zeros = kfnz - fsupc;
 
-	    /* Gather U[*,j] segment from dense[*] to tempv[*]: 
+	    /* Gather U[*,j] segment from dense[*] to tempv[*]:
 	     *   The result of triangular solve is in tempv[*];
 	     *   The result of matrix vector update is in dense_col[*]
 	     */
@@ -221,43 +221,43 @@ if (krep == BADCOL && jj == -1) {
 #ifdef TIMING
 	    f_time = SuperLU_timer_();
 #endif
-		
+
 #ifdef USE_VENDOR_BLAS
 #if ( MACH==CRAY_PVP )
-	    STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr], 
+	    STRSV( ftcs1, ftcs2, ftcs3, &segsze, &lusup[luptr],
 		  &nsupr, tempv, &incx );
 #else
-	    strsv_( "L", "N", "U", &segsze, &lusup[luptr], 
+	    strsv_( "L", "N", "U", &segsze, &lusup[luptr],
 		   &nsupr32, tempv, &incx );
 #endif
-		
+
 	    luptr += segsze;	/* Dense matrix-vector */
 	    tempv1 = &tempv[segsze];
 
             alpha = one;
             beta = zero;
 #if ( MACH==CRAY_PVP )
-	    SGEMV( ftcs2, &nrow, &segsze, &alpha, &lusup[luptr], 
+	    SGEMV( ftcs2, &nrow, &segsze, &alpha, &lusup[luptr],
 		  &nsupr, tempv, &incx, &beta, tempv1, &incy );
 #else
-	    sgemv_( "N", &nrow32, &segsze, &alpha, &lusup[luptr], 
+	    sgemv_( "N", &nrow32, &segsze, &alpha, &lusup[luptr],
 		   &nsupr32, tempv, &incx, &beta, tempv1, &incy );
 #endif /* _CRAY_PVP */
 #else
 	    slsolve ( nsupr, segsze, &lusup[luptr], tempv );
-	    
+
 	    luptr += segsze;        /* Dense matrix-vector */
 	    tempv1 = &tempv[segsze];
 	    smatvec (nsupr, nrow, segsze, &lusup[luptr], tempv, tempv1);
 #endif
-		
+
 #ifdef TIMING
 	    utime[FLOAT] += SuperLU_timer_() - f_time;
-#endif	    
+#endif
 
-	    /* Scatter tempv[*] into SPA dense[*] temporarily, 
+	    /* Scatter tempv[*] into SPA dense[*] temporarily,
 	     * such that tempv[*] can be used for the triangular solve of
-	     * the next column of the panel. They will be copied into 
+	     * the next column of the panel. They will be copied into
 	     * ucol[*] after the whole panel has been finished.
 	     */
 	    isub = lptr + no_zeros;
@@ -273,24 +273,24 @@ if (krep == BADCOL && jj == -1) {
 		   pnum, jj, irow, dense_col[irow]);
 #endif
 	    }
-		
+
 	    /* Scatter the update from tempv1[*] into SPA dense[*] */
 /*#pragma ivdep*/
 	    for (i = 0; i < nrow; i++) {
 		irow = lsub[isub];
                 dense_col[irow] -= tempv1[i]; /* Scatter-add */
-#ifdef SCATTER_FOUND		
+#ifdef SCATTER_FOUND
 		if ( col_marker[irow] != jj ) {
 		    col_marker[irow] = jj;
 		    col_lsub[w_lsub_end[jj-jcol]++] = irow;
 		}
-#endif		
+#endif
 		tempv1[i] = zero;
 		isub++;
 	    }
-		
+
 	} /* else segsze >= 4 ... */
-	
+
     } /* for jj ... */
 
 }
