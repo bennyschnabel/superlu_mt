@@ -1,15 +1,21 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
 */
 
 #include "slu_mt_ddefs.h"
+
+void
+dCheckZeroDiagonal(int_t n, int_t *rowind, int_t *colbeg, int_t *colend, int_t *perm_c);
+
+void
+dPrintSuperPart(char *pname, int_t n, int_t *part_super);
 
 void
 sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
@@ -25,7 +31,7 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
  * Purpose
  * =======
  *
- * sp_colorder() permutes the columns of the original matrix A into AC. 
+ * sp_colorder() permutes the columns of the original matrix A into AC.
  * It performs the following steps:
  *
  *    1. Apply column permutation perm_c[] to A's column pointers to form AC;
@@ -36,7 +42,7 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
  *           and a postorder permutation post[];
  *       (3) Apply post[] permutation to columns of AC;
  *       (4) Overwrite perm_c[] with the product perm_c * post.
- *       (5) Compute the column count (colcnt_h) and the supernode 
+ *       (5) Compute the column count (colcnt_h) and the supernode
  *           partition (part_super_h) for the Householder matrix H.
  *
  * Arguments
@@ -48,15 +54,15 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
  *        Stype = NC or NCP; Dtype = _D; Mtype = GE.
  *
  * perm_c (input/output) int_t*
- *	  Column permutation vector of size A->ncol, which defines the 
- *        permutation matrix Pc; perm_c[i] = j means column i of A is 
+ *	  Column permutation vector of size A->ncol, which defines the
+ *        permutation matrix Pc; perm_c[i] = j means column i of A is
  *        in position j in A*Pc.
  *
  * options (input/output) superlumt_options_t*
  *        If options->refact = YES, then options is an
  *        input argument. The arrays etree[], colcnt_h[] and part_super_h[]
  *        are available from a previous factor and will be re-used.
- *        If options->refact = NO, then options is an output argument. 
+ *        If options->refact = NO, then options is an output argument.
  *
  * AC     (output) SuperMatrix*
  *        The resulting matrix after applied the column permutation
@@ -97,19 +103,19 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 #ifdef CHK_COLORDER
     print_int_vec("pre_order:", n, perm_c);
     dcheck_perm("Initial perm_c", n, perm_c);
-#endif      
+#endif
 
     for (i = 0; i < n; i++) {
-	ACstore->colbeg[perm_c[i]] = Astore->colptr[i]; 
+	ACstore->colbeg[perm_c[i]] = Astore->colptr[i];
 	ACstore->colend[perm_c[i]] = Astore->colptr[i+1];
     }
-	
+
     if ( refact == NO ) {
 	int_t *b_colptr, *b_rowind, bnz, j;
-	
+
 	iwork = intMalloc(n+1);
 	part_super_ata = intMalloc(n);
-    
+
 	if ( options->SymmetricMode ) {
 	    /* Compute the etree of C = Pc*(A'+A)*Pc'. */
 	    int_t *c_colbeg, *c_colend;
@@ -117,14 +123,14 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 	    /* Form B = A + A'. */
 	    at_plus_a(n, Astore->nnz, Astore->colptr, Astore->rowind,
 		      &bnz, &b_colptr, &b_rowind);
-	    
+
 	    /* Form C = Pc*B*Pc'. */
 	    c_colbeg = (int_t*) intMalloc(n);
 	    c_colend = (int_t*) intMalloc(n);
 	    if (!(c_colbeg) || !(c_colend) )
 		SUPERLU_ABORT("SUPERLU_MALLOC fails for c_colbeg/c_colend");
 	    for (i = 0; i < n; i++) {
-		c_colbeg[perm_c[i]] = b_colptr[i]; 
+		c_colbeg[perm_c[i]] = b_colptr[i];
 		c_colend[perm_c[i]] = b_colptr[i+1];
 	    }
 	    for (j = 0; j < n; ++j) {
@@ -135,7 +141,7 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 	    }
 
 	    /* Compute etree of C. */
-	    sp_symetree( c_colbeg, c_colend, b_rowind, n, 
+	    sp_symetree( c_colbeg, c_colend, b_rowind, n,
 			 options->etree );
 
 	    /* Restore B to be A+A', without column permutation */
@@ -144,16 +150,16 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 
 	    SUPERLU_FREE(c_colbeg);
 	    SUPERLU_FREE(c_colend);
-	    
+
 	} else {
 	    /* Compute the column elimination tree. */
 	    sp_coletree( ACstore->colbeg, ACstore->colend, ACstore->rowind,
 			 A->nrow, A->ncol, options->etree );
 	}
 
-#ifdef CHK_COLORDER	
+#ifdef CHK_COLORDER
 	print_int_vec("etree:", n, otpions->etree);
-#endif	
+#endif
 
 	/* Post order etree. */
 	post = (int_t *) TreePostorder(n, options->etree);
@@ -162,14 +168,14 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 
 #ifdef CHK_COLORDER
 	print_int_vec("post:", n+1, post);
-	dcheck_perm("post", n, post);	
-#endif	
+	dcheck_perm("post", n, post);
+#endif
 
 	/* Renumber etree in postorder. */
 	for (i = 0; i < n; ++i) iwork[post[i]] = post[options->etree[i]];
 	for (i = 0; i < n; ++i) options->etree[i] = iwork[i];
 
-#ifdef CHK_COLORDER	
+#ifdef CHK_COLORDER
 	print_int_vec("postorder etree:", n, options->etree);
 #endif
 
@@ -194,7 +200,7 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 	zfdperm(n, nnz, ACstore->rowind, ACstore->colbeg, iwork, iperm);
 #else
 	for (i = 0; i < n; ++i) iperm[i] = i;
-#endif	
+#endif
 
 	/* NOTE: iperm is returned as column permutation so that
 	 * the diagonal is nonzero. Since a symmetric permutation
@@ -211,15 +217,15 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 	    /* Determine column count in the Cholesky factor of B = A+A' */
 #if 0
 	    cholnzcnt(n, Astore->colptr, Astore->rowind,
-		      invp, perm_c, options->etree, 
+		      invp, perm_c, options->etree,
 		      options->colcnt_h, &nlnz, options->part_super_h);
 #else
 	    cholnzcnt(n, b_colptr, b_rowind, invp, perm_c,
 		      options->etree, options->colcnt_h, &nlnz,
 		      options->part_super_h);
 #endif
-#if ( PRNTlevel>=1 ) 
-	    printf(".. bnz %d\n", bnz);
+#if ( PRNTlevel>=1 )
+	    printf(".. bnz" IFMT "\n", bnz);
 #endif
 
 	    SUPERLU_FREE(b_colptr);
@@ -238,11 +244,11 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 	print_int_vec("colcnt", n, options->colcnt_h);
 	dPrintSuperPart("Hpart", n, options->part_super_h);
 	print_int_vec("iperm", n, iperm);
-#endif	
-	
+#endif
+
 #ifdef CHK_COLORDER
 	print_int_vec("Pc*post:", n, perm_c);
-	dcheck_perm("final perm_c", n, perm_c);	
+	dcheck_perm("final perm_c", n, perm_c);
 #endif
 
 	SUPERLU_FREE (post);
@@ -254,8 +260,7 @@ sp_colorder(SuperMatrix *A, int_t *perm_c, superlumt_options_t *options,
 
 }
 
-int_t
-dCheckZeroDiagonal(int_t n, int_t *rowind, int_t *colbeg,
+void dCheckZeroDiagonal(int_t n, int_t *rowind, int_t *colbeg,
 		  int_t *colend, int_t *perm)
 {
     register int_t i, j, nzd, nd = 0;
@@ -274,14 +279,13 @@ dCheckZeroDiagonal(int_t n, int_t *rowind, int_t *colbeg,
 
     printf(".. dCheckZeroDiagonal() -- # diagonals " IFMT "\n", nd);
 
-    return 0;
+    return;
 }
 
-int_t
-dPrintSuperPart(char *pname, int_t n, int_t *part_super)
+void dPrintSuperPart(char *pname, int_t n, int_t *part_super)
 {
     register int_t i;
-    FILE *fopen(const char *restrict, const char *restrict), *fp;
+    FILE *fp;
     char fname[20];
     strcpy(fname, pname);
     strcat(fname, ".dat");
@@ -290,7 +294,7 @@ dPrintSuperPart(char *pname, int_t n, int_t *part_super)
 	if ( part_super[i] ) fprintf(fp, IFMT, i);
     fprintf(fp, IFMT, n);
     fclose(fp);
-    return 0;
+    return;
 }
 
 int_t dcheck_perm(char *what, int_t n, int_t *perm)

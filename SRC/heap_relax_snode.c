@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -32,7 +32,7 @@ heap_relax_snode (
  *    that the matrix has been reordered according to the postorder of
  *    the etree.
  *
- */ 
+ */
     register int_t i, j, k, l, parent;
     register int_t snode_start;	/* beginning of a snode */
     int_t *et_save, *post, *inv_post, *iwork;
@@ -41,14 +41,14 @@ heap_relax_snode (
     register int_t fcol;	 /* beginning of a snode */
     int_t *desc;  /* no of descendants of each etree node. */
     int_t *et = superlumt_options->etree; /* column elimination tree */
-    int_t relax = superlumt_options->relax; /* maximum no of columns allowed 
+    int_t relax = superlumt_options->relax; /* maximum no of columns allowed
 					     in a relaxed s-node */
-    
+
     desc = intCalloc(n+1);
 
     /* The etree may not be postordered, but is always heap-ordered. */
 
-    if ( !(iwork = (int_t*) intMalloc(3*n+2)) ) 
+    if ( !(iwork = (int_t*) intMalloc(3*n+2)) )
 	SUPERLU_ABORT("SUPERLU_MALLOC fails for iwork[]");
     inv_post = iwork    + n+1;
     et_save  = inv_post + n+1;
@@ -73,7 +73,7 @@ heap_relax_snode (
     }
 
     /* Identify the relaxed supernodes by postorder traversal of the etree. */
-    for (j = 0; j < n; ) { 
+    for (j = 0; j < n; ) {
      	parent = et[j];
         snode_start = j;
  	while ( parent != n && desc[parent] < relax ) {
@@ -110,8 +110,8 @@ heap_relax_snode (
 
 #if ( PRNTlevel>=1 )
     printf(".. heap_snode_relax:\n"
-	   "\tNo of relaxed snodes in postordered etree:\t%d\n"
-	   "\tNo of relaxed snodes in original etree:\t%d\n",
+	   "\tNo of relaxed snodes in postordered etree:\t" IFMT "\n"
+	   "\tNo of relaxed snodes in original etree:\t" IFMT "\n",
 	   nsuper_et_post, nsuper_et);
 #endif
 
@@ -121,7 +121,5 @@ heap_relax_snode (
     SUPERLU_FREE(desc);
     SUPERLU_FREE(post);
     SUPERLU_FREE(iwork);
-    
+
 }
-
-
