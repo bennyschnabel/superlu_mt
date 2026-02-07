@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -13,16 +13,16 @@ at the top-level directory.
 
 
 void
-psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A, 
+psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
 	int_t *perm_c, int_t *perm_r, equed_t *equed, float *R, float *C,
 	SuperMatrix *L, SuperMatrix *U,
-	SuperMatrix *B, SuperMatrix *X, float *recip_pivot_growth, 
-	float *rcond, float *ferr, float *berr, 
+	SuperMatrix *B, SuperMatrix *X, float *recip_pivot_growth,
+	float *rcond, float *ferr, float *berr,
 	superlu_memusage_t *superlu_memusage, int_t *info)
 {
 /*
  * -- SuperLU MT routine (version 2.0) --
- * Lawrence Berkeley National Lab, Univ. of California Berkeley, 
+ * Lawrence Berkeley National Lab, Univ. of California Berkeley,
  * and Xerox Palo Alto Research Center.
  * September 10, 2007
  *
@@ -34,7 +34,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  * a condition estimate are also provided. It performs the following steps:
  *
  * 1. If A is stored column-wise (A->Stype = NC):
- *  
+ *
  *    1.1. If fact = EQUILIBRATE, scaling factors are computed to equilibrate
  *         the system:
  *           trans = NOTRANS: diag(R)*A*diag(C)*inv(diag(C))*X = diag(R)*B
@@ -42,14 +42,14 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *           trans = CONJ:   (diag(R)*A*diag(C))**H *inv(diag(R))*X = diag(C)*B
  *         Whether or not the system will be equilibrated depends on the
  *         scaling of the matrix A, but if equilibration is used, A is
- *         overwritten by diag(R)*A*diag(C) and B by diag(R)*B 
+ *         overwritten by diag(R)*A*diag(C) and B by diag(R)*B
  *         (if trans = NOTRANS) or diag(C)*B (if trans = TRANS or CONJ).
  *
  *    1.2. Permute columns of A, forming A*Pc, where Pc is a permutation matrix
  *         that usually preserves sparsity.
  *         For more details of this step, see ssp_colorder.c.
  *
- *    1.3. If fact = DOFACT or EQUILIBRATE, the LU decomposition is used to 
+ *    1.3. If fact = DOFACT or EQUILIBRATE, the LU decomposition is used to
  *         factor the matrix A (after equilibration if fact = EQUILIBRATE) as
  *         Pr*A*Pc = L*U, with Pr determined by partial pivoting.
  *
@@ -58,7 +58,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *    1.5. If some U(i,i) = 0, so that U is exactly singular, then the routine
  *         returns with info = i. Otherwise, the factored form of A is used to
  *         estimate the condition number of the matrix A. If the reciprocal of
- *         the condition number is less than machine precision, 
+ *         the condition number is less than machine precision,
  *         info = A->ncol+1 is returned as a warning, but the routine still
  *         goes on to solve for X and computes error bounds as described below.
  *
@@ -83,15 +83,15 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *           trans = CONJ:  (diag(R)*A'*diag(C))**H *inv(diag(R))*X = diag(C)*B
  *         Whether or not the system will be equilibrated depends on the
  *         scaling of the matrix A, but if equilibration is used, A' is
- *         overwritten by diag(R)*A'*diag(C) and B by diag(R)*B 
+ *         overwritten by diag(R)*A'*diag(C) and B by diag(R)*B
  *         (if trans = NOTRANS) or diag(C)*B (if trans = TRANS or CONJ).
  *
- *    2.2. Permute columns of transpose(A) (rows of A), 
+ *    2.2. Permute columns of transpose(A) (rows of A),
  *         forming transpose(A)*Pc, where Pc is a permutation matrix that
  *         usually preserves sparsity.
  *         For more details of this step, see ssp_colorder.c.
  *
- *    2.3. If fact = DOFACT or EQUILIBRATE, the LU decomposition is used to 
+ *    2.3. If fact = DOFACT or EQUILIBRATE, the LU decomposition is used to
  *         factor the matrix A (after equilibration if fact = EQUILIBRATE) as
  *         Pr*transpose(A)*Pc = L*U, with the permutation Pr determined by
  *         partial pivoting.
@@ -125,7 +125,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  * nprocs (input) int_t
  *         Number of processes (or threads) to be spawned and used to perform
  *         the LU factorization by psgstrf(). There is a single thread of
- *         control to call psgstrf(), and all threads spawned by psgstrf() 
+ *         control to call psgstrf(), and all threads spawned by psgstrf()
  *         are terminated before returning from psgstrf().
  *
  * superlumt_options (input) superlumt_options_t*
@@ -141,7 +141,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *             stored in L and U.
  *           = EQUILIBRATE: The matrix A will be equilibrated if necessary,
  *             then factored into L and U.
- *           = FACTORED: On entry, L, U, perm_r and perm_c contain the 
+ *           = FACTORED: On entry, L, U, perm_r and perm_c contain the
  *             factored form of A. If equed is not NOEQUIL, the matrix A has
  *             been equilibrated with scaling factors R and C.
  *             A, L, U, perm_r are not modified.
@@ -171,11 +171,11 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *           regardless of the row structures of those columns.
  *
  *         o diag_pivot_thresh (float)
- *           Diagonal pivoting threshold. At step j of the Gaussian 
- *           elimination, if 
+ *           Diagonal pivoting threshold. At step j of the Gaussian
+ *           elimination, if
  *               abs(A_jj) >= diag_pivot_thresh * (max_(i>=j) abs(A_ij)),
- *           use A_jj as pivot, else use A_ij with maximum magnitude. 
- *           0 <= diag_pivot_thresh <= 1. The default value is 1, 
+ *           use A_jj as pivot, else use A_ij with maximum magnitude.
+ *           0 <= diag_pivot_thresh <= 1. The default value is 1,
  *           corresponding to partial pivoting.
  *
  *         o usepr (yes_no_t)
@@ -222,10 +222,10 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *         Stype = NC or NR, Dtype = _D, Mtype = GE. In the future,
  *         more general A will be handled.
  *
- *         On entry, If superlumt_options->fact = FACTORED and equed is not 
+ *         On entry, If superlumt_options->fact = FACTORED and equed is not
  *         NOEQUIL, then A must have been equilibrated by the scaling factors
- *         in R and/or C.  On exit, A is not modified 
- *         if superlumt_options->fact = FACTORED or DOFACT, or 
+ *         in R and/or C.  On exit, A is not modified
+ *         if superlumt_options->fact = FACTORED or DOFACT, or
  *         if superlumt_options->fact = EQUILIBRATE and equed = NOEQUIL.
  *
  *         On exit, if superlumt_options->fact = EQUILIBRATE and equed is not
@@ -249,13 +249,13 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *         is already in postorder.
  *
  *         If A->Stype = NR, column permutation vector of size A->nrow,
- *         which describes permutation of columns of tranpose(A) 
+ *         which describes permutation of columns of tranpose(A)
  *         (rows of A) as described above.
- * 
+ *
  * perm_r  (input/output) int_t*
- *         If A->Stype = NC, row permutation vector of size A->nrow, 
+ *         If A->Stype = NC, row permutation vector of size A->nrow,
  *         which defines the permutation matrix Pr, and is determined
- *         by partial pivoting.  perm_r[i] = j means row i of A is in 
+ *         by partial pivoting.  perm_r[i] = j means row i of A is in
  *         position j in Pr*A.
  *
  *         If A->Stype = NR, permutation vector of size A->ncol, which
@@ -263,20 +263,20 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *         (columns of A) as described above.
  *
  *         If superlumt_options->usepr = NO, perm_r is output argument;
- *         If superlumt_options->usepr = YES, the pivoting routine will try 
+ *         If superlumt_options->usepr = YES, the pivoting routine will try
  *            to use the input perm_r, unless a certain threshold criterion
  *            is violated. In that case, perm_r is overwritten by a new
- *            permutation determined by partial pivoting or diagonal 
+ *            permutation determined by partial pivoting or diagonal
  *            threshold pivoting.
- * 
+ *
  * equed   (input/output) equed_t*
  *         Specifies the form of equilibration that was done.
  *         = NOEQUIL: No equilibration.
  *         = ROW:  Row equilibration, i.e., A was premultiplied by diag(R).
  *         = COL:  Column equilibration, i.e., A was postmultiplied by diag(C).
- *         = BOTH: Both row and column equilibration, i.e., A was replaced 
+ *         = BOTH: Both row and column equilibration, i.e., A was replaced
  *                 by diag(R)*A*diag(C).
- *         If superlumt_options->fact = FACTORED, equed is an input argument, 
+ *         If superlumt_options->fact = FACTORED, equed is an input argument,
  *         otherwise it is an output argument.
  *
  * R       (input/output) double*, dimension (A->nrow)
@@ -287,7 +287,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *         If fact = FACTORED, R is an input argument; otherwise, R is output.
  *         If fact = FACTORED and equed = ROW or BOTH, each element of R must
  *            be positive.
- * 
+ *
  * C       (input/output) double*, dimension (A->ncol)
  *         The column scale factors for A or transpose(A).
  *         If equed = COL or BOTH, A (if A->Stype = NC) or trnspose(A)
@@ -296,7 +296,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *         If fact = FACTORED, C is an input argument; otherwise, C is output.
  *         If fact = FACTORED and equed = COL or BOTH, each element of C must
  *            be positive.
- *         
+ *
  * L       (output) SuperMatrix*
  *	   The factor L from the factorization
  *             Pr*A*Pc=L*U              (if A->Stype = NC) or
@@ -328,10 +328,10 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *                  overwritten by diag(R)*B.
  *
  * X       (output) SuperMatrix*
- *         X has types: Stype = DN, Dtype = _D, Mtype = GE. 
+ *         X has types: Stype = DN, Dtype = _D, Mtype = GE.
  *         If info = 0 or info = A->ncol+1, X contains the solution matrix
  *         to the original system of equations. Note that A and B are modified
- *         on exit if equed is not NOEQUIL, and the solution to the 
+ *         on exit if equed is not NOEQUIL, and the solution to the
  *         equilibrated system is inv(diag(C))*X if trans = NOTRANS and
  *         equed = COL or BOTH, or inv(diag(R))*X if trans = TRANS or CONJ
  *         and equed = ROW or BOTH.
@@ -349,19 +349,19 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *         to working precision. This condition is indicated by a return
  *         code of info > 0.
  *
- * ferr    (output) float*, dimension (B->ncol)   
- *         The estimated forward error bound for each solution vector   
- *         X(j) (the j-th column of the solution matrix X).   
- *         If XTRUE is the true solution corresponding to X(j), FERR(j) 
- *         is an estimated upper bound for the magnitude of the largest 
- *         element in (X(j) - XTRUE) divided by the magnitude of the   
- *         largest element in X(j).  The estimate is as reliable as   
- *         the estimate for RCOND, and is almost always a slight   
+ * ferr    (output) float*, dimension (B->ncol)
+ *         The estimated forward error bound for each solution vector
+ *         X(j) (the j-th column of the solution matrix X).
+ *         If XTRUE is the true solution corresponding to X(j), FERR(j)
+ *         is an estimated upper bound for the magnitude of the largest
+ *         element in (X(j) - XTRUE) divided by the magnitude of the
+ *         largest element in X(j).  The estimate is as reliable as
+ *         the estimate for RCOND, and is almost always a slight
  *         overestimate of the true error.
  *
  * berr    (output) float*, dimension (B->ncol)
- *         The componentwise relative backward error of each solution   
- *         vector X(j) (i.e., the smallest relative change in   
+ *         The componentwise relative backward error of each solution
+ *         vector X(j) (i.e., the smallest relative change in
  *         any element of A or B that makes X(j) an exact solution).
  *
  * superlu_memusage (output) superlu_memusage_t*
@@ -374,19 +374,19 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
  *           The number of memory expansions during the LU factorization.
  *
  * info    (output) int_t*
- *         = 0: successful exit   
- *         < 0: if info = -i, the i-th argument had an illegal value   
- *         > 0: if info = i, and i is   
- *              <= A->ncol: U(i,i) is exactly zero. The factorization has   
- *                    been completed, but the factor U is exactly   
- *                    singular, so the solution and error bounds   
- *                    could not be computed.   
+ *         = 0: successful exit
+ *         < 0: if info = -i, the i-th argument had an illegal value
+ *         > 0: if info = i, and i is
+ *              <= A->ncol: U(i,i) is exactly zero. The factorization has
+ *                    been completed, but the factor U is exactly
+ *                    singular, so the solution and error bounds
+ *                    could not be computed.
  *              = A->ncol+1: U is nonsingular, but RCOND is less than machine
  *                    precision, meaning that the matrix is singular to
  *                    working precision. Nevertheless, the solution and
  *                    error bounds are computed because there are a number
  *                    of situations where the computed solution can be more
- *                    accurate than the value of RCOND would suggest.   
+ *                    accurate than the value of RCOND would suggest.
  *              > A->ncol+1: number of bytes allocated when memory allocation
  *                    failure occurred, plus A->ncol.
  *
@@ -402,14 +402,14 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
     char      norm[1];
     trans_t   trant;
     int_t     j, info1;
-    int i;
+    int_t i;
     float amax, anorm, bignum, smlnum, colcnd, rowcnd, rcmax, rcmin;
     int_t       n, relax, panel_size;
     Gstat_t   Gstat;
     double    t0;      /* temporary time */
     double    *utime;
     flops_t   *ops, flopcnt;
-   
+
     /* External functions */
     extern float slangs(char *, SuperMatrix *);
     extern double slamch_(char *);
@@ -446,9 +446,9 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
        ------------------------------------------------------------*/
     if ( nprocs <= 0 ) *info = -1;
     else if ( (!dofact && !equil && (superlumt_options->fact != FACTORED))
-	      || (!notran && (superlumt_options->trans != TRANS) && 
+	      || (!notran && (superlumt_options->trans != TRANS) &&
 		 (superlumt_options->trans != CONJ))
-	      || (superlumt_options->refact != YES && 
+	      || (superlumt_options->refact != YES &&
 		  superlumt_options->refact != NO)
 	      || (superlumt_options->usepr != YES &&
 		  superlumt_options->usepr != NO)
@@ -458,7 +458,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
 	      (A->Stype != SLU_NC && A->Stype != SLU_NR) ||
 	      A->Dtype != SLU_S || A->Mtype != SLU_GE )
 	*info = -3;
-    else if ((superlumt_options->fact == FACTORED) && 
+    else if ((superlumt_options->fact == FACTORED) &&
 	     !(rowequ || colequ || (*equed == NOEQUIL))) *info = -6;
     else {
 	if (rowequ) {
@@ -487,7 +487,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
 	}
 	if (*info == 0) {
 	    if ( B->ncol < 0 || Bstore->lda < SUPERLU_MAX(0, A->nrow) ||
-		      B->Stype != SLU_DN || B->Dtype != SLU_S || 
+		      B->Stype != SLU_DN || B->Dtype != SLU_S ||
 		      B->Mtype != SLU_GE )
 		*info = -11;
 	    else if ( X->ncol < 0 || Xstore->lda < SUPERLU_MAX(0, A->nrow) ||
@@ -501,10 +501,10 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
 	xerbla_("psgssvx", &i);
 	return;
     }
-    
-    
+
+
     /* ------------------------------------------------------------
-       Allocate storage and initialize statistics variables. 
+       Allocate storage and initialize statistics variables.
        ------------------------------------------------------------*/
     panel_size = superlumt_options->panel_size;
     relax = superlumt_options->relax;
@@ -512,14 +512,14 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
     StatInit(n, nprocs, &Gstat);
     utime = Gstat.utime;
     ops = Gstat.ops;
-    
+
     /* ------------------------------------------------------------
        Convert A to NC format when necessary.
        ------------------------------------------------------------*/
     if ( A->Stype == SLU_NR ) {
 	NRformat *Astore = A->Store;
 	AA = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
-	sCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz, 
+	sCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz,
 			       Astore->nzval, Astore->colind, Astore->rowptr,
 			       SLU_NC, A->Dtype, A->Mtype);
 	if ( notran ) { /* Reverse the transpose argument. */
@@ -541,7 +541,7 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
 	t0 = SuperLU_timer_();
 	/* Compute row and column scalings to equilibrate the matrix A. */
 	sgsequ(AA, R, C, &rowcnd, &colcnd, &amax, &info1);
-	
+
 	if ( info1 == 0 ) {
 	    /* Equilibrate matrix A. */
 	    slaqgs(AA, R, C, rowcnd, colcnd, amax, equed);
@@ -568,29 +568,29 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
 	    }
     }
 
-    
+
     /* ------------------------------------------------------------
        Perform the LU factorization.
        ------------------------------------------------------------*/
     if ( dofact || equil ) {
-	
+
         /* Obtain column etree, the column count (colcnt_h) and supernode
 	   partition (part_super_h) for the Householder matrix. */
 	t0 = SuperLU_timer_();
 	sp_colorder(AA, perm_c, superlumt_options, &AC);
 	utime[ETREE] = SuperLU_timer_() - t0;
 
-#if ( PRNTlevel >= 2 )    
-	printf("Factor PA = LU ... relax %d\tw %d\tmaxsuper %d\trowblk %d\n", 
+#if ( PRNTlevel >= 2 )
+	printf("Factor PA = LU ... relax %d\tw %d\tmaxsuper %d\trowblk %d\n",
 	       relax, panel_size, sp_ienv(3), sp_ienv(4));
 	fflush(stdout);
 #endif
-	
+
 	/* Compute the LU factorization of A*Pc. */
 	t0 = SuperLU_timer_();
 	psgstrf(superlumt_options, &AC, perm_r, L, U, &Gstat, info);
 	utime[FACT] = SuperLU_timer_() - t0;
-	
+
 	flopcnt = 0;
 	for (i = 0; i < nprocs; ++i) flopcnt += Gstat.procstat[i].fcops;
 	ops[FACT] = flopcnt;
@@ -626,19 +626,19 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
 	anorm = slangs(norm, AA);
 	sgscon(norm, L, U, anorm, rcond, info);
 	utime[RCOND] = SuperLU_timer_() - t0;
-    
+
 	/* ------------------------------------------------------------
 	   Compute the solution matrix X.
 	   ------------------------------------------------------------*/
 	for (j = 0; j < nrhs; j++)    /* Save a copy of the right hand sides */
 	    for (i = 0; i < B->nrow; i++)
 		Xmat[i + j*ldx] = Bmat[i + j*ldb];
-    
+
 	t0 = SuperLU_timer_();
 	sgstrs(trant, L, U, perm_r, perm_c, X, &Gstat, info);
 	utime[SOLVE] = SuperLU_timer_() - t0;
 	ops[SOLVE] = ops[TRISOLVE];
-    
+
 	/* ------------------------------------------------------------
 	   Use iterative refinement to improve the computed solution and
 	   compute error bounds and backward error estimates for it.
@@ -665,11 +665,11 @@ psgssvx(int_t nprocs, superlumt_options_t *superlumt_options, SuperMatrix *A,
                     Xmat[i + j*ldx] *= R[i];
 		}
 	}
-	
-	/* Set INFO = A->ncol+1 if the matrix is singular to 
+
+	/* Set INFO = A->ncol+1 if the matrix is singular to
 	   working precision.*/
 	if ( *rcond < slamch_("E") ) *info = A->ncol + 1;
-	
+
     }
 
     superlu_sQuerySpace(nprocs, L, U, panel_size, superlu_memusage);

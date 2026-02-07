@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -27,7 +27,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
  *
  *
  * Purpose
- * =======   
+ * =======
  *
  * dgsrfs improves the computed solution to a system of linear
  * equations and provides error bounds and backward error estimates for
@@ -65,7 +65,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
  *
  * perm_c  (input) int_t*, dimension (A->ncol)
  *         Column permutation vector, which defines the
- *         permutation matrix Pc; perm_c[i] = j means column i of A is 
+ *         permutation matrix Pc; perm_c[i] = j means column i of A is
  *         in position j in A*Pc.
  *
  * equed   (input) equed_t
@@ -123,12 +123,12 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
  */
 
 #define ITMAX 5
-    
+
     /* Table of constant values */
-    int    ione = 1, nrow = A->nrow;
+    int_t    ione = 1, nrow = A->nrow;
     double ndone = -1.;
     double done = 1.;
-    
+
     /* Local variables */
     NCformat *Astore;
     double   *Aval;
@@ -138,7 +138,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     int_t      kase;
     double   safe1, safe2;
     int_t      j, k, irow, nz, count, notran, rowequ, colequ;
-    int        i;
+    int_t        i;
     int_t      ldb, ldx, nrhs;
     double   s, xk, lstres, eps, safmin;
     char     transc[1];
@@ -165,7 +165,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     ldb    = Bstore->lda;
     ldx    = Xstore->lda;
     nrhs   = B->ncol;
-    
+
     /* Test the input parameters */
     *info = 0;
     notran = (trans == NOTRANS);
@@ -202,14 +202,14 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 
     rowequ = (equed == ROW) || (equed == BOTH);
     colequ = (equed == COL) || (equed == BOTH);
-    
+
     /* Allocate working space */
     work = doubleMalloc(2*A->nrow);
     rwork = (double *) SUPERLU_MALLOC( (size_t) A->nrow * sizeof(double) );
     iwork = intMalloc(2*A->nrow);
-    if ( !work || !rwork || !iwork ) 
+    if ( !work || !rwork || !iwork )
         SUPERLU_ABORT("Malloc fails for work/rwork/iwork.");
-    
+
     if ( notran ) {
 	*(unsigned char *)transc = 'N';
         transt = TRANS;
@@ -231,12 +231,12 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     for (i = 0; i < A->nrow; ++i) iwork[i] = 0;
     if ( notran ) {
 	for (k = 0; k < A->ncol; ++k)
-	    for (i = Astore->colptr[k]; i < Astore->colptr[k+1]; ++i) 
+	    for (i = Astore->colptr[k]; i < Astore->colptr[k+1]; ++i)
 		++iwork[Astore->rowind[i]];
     } else {
 	for (k = 0; k < A->ncol; ++k)
 	    iwork[k] = Astore->colptr[k+1] - Astore->colptr[k];
-    }	
+    }
 
     /* Copy one column of RHS B into Bjcol. */
     Bjcol.Stype = B->Stype;
@@ -249,7 +249,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     Bjcol_store = Bjcol.Store;
     Bjcol_store->lda = ldb;
     Bjcol_store->nzval = work; /* address aliasing */
-	
+
     /* Do for each right hand side ... */
     for (j = 0; j < nrhs; ++j) {
 	count = 0;
@@ -259,9 +259,9 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 
 	while (1) { /* Loop until stopping criterion is satisfied. */
 
-	    /* Compute residual R = B - op(A) * X,   
+	    /* Compute residual R = B - op(A) * X,
 	       where op(A) = A, A**T, or A**H, depending on TRANS. */
-	    
+
 #ifdef _CRAY
 	    SCOPY(&nrow, Bptr, &ione, work, &ione);
 #else
@@ -269,15 +269,15 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 #endif
 	    sp_dgemv(transc, ndone, A, Xptr, ione, done, work, ione);
 
-	    /* Compute componentwise relative backward error from formula 
-	       max(i) ( abs(R(i)) / ( abs(op(A))*abs(X) + abs(B) )(i) )   
+	    /* Compute componentwise relative backward error from formula
+	       max(i) ( abs(R(i)) / ( abs(op(A))*abs(X) + abs(B) )(i) )
 	       where abs(Z) is the componentwise absolute value of the matrix
 	       or vector Z.  If the i-th component of the denominator is less
-	       than SAFE2, then SAFE1 is added to the i-th component of the   
+	       than SAFE2, then SAFE1 is added to the i-th component of the
 	       numerator before dividing. */
 
 	    for (i = 0; i < A->nrow; ++i) rwork[i] = fabs( Bptr[i] );
-	    
+
 	    /* Compute abs(op(A))*abs(X) + abs(B). */
 	    if (notran) {
 		for (k = 0; k < A->ncol; ++k) {
@@ -302,21 +302,21 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 		} else if ( rwork[i] != 0.0 ) {
 		    s = SUPERLU_MAX( s, (fabs(work[i]) + safe1) / rwork[i] );
                 }
-                /* If rwork[i] is exactly 0.0, then we know the true 
+                /* If rwork[i] is exactly 0.0, then we know the true
                    residual also must be exactly 0.0. */
 	    }
 	    berr[j] = s;
 
-	    /* Test stopping criterion. Continue iterating if   
-	       1) The residual BERR(J) is larger than machine epsilon, and   
-	       2) BERR(J) decreased by at least a factor of 2 during the   
-	          last iteration, and   
+	    /* Test stopping criterion. Continue iterating if
+	       1) The residual BERR(J) is larger than machine epsilon, and
+	       2) BERR(J) decreased by at least a factor of 2 during the
+	          last iteration, and
 	       3) At most ITMAX iterations tried. */
 
 	    if (berr[j] > eps && berr[j] * 2. <= lstres && count < ITMAX) {
 		/* Update solution and try again. */
 		dgstrs (trans, L, U, perm_r, perm_c, &Bjcol, Gstat, info);
-		
+
 #ifdef _CRAY
 		SAXPY(&nrow, &done, work, &ione,
 		       &Xmat[j*ldx], &ione);
@@ -329,30 +329,30 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	    } else {
 		break;
 	    }
-        
+
 	} /* end while */
 
 	/* Bound error from formula:
-	   norm(X - XTRUE) / norm(X) .le. FERR = norm( abs(inv(op(A)))*   
-	   ( abs(R) + NZ*EPS*( abs(op(A))*abs(X)+abs(B) ))) / norm(X)   
-          where   
-            norm(Z) is the magnitude of the largest component of Z   
-            inv(op(A)) is the inverse of op(A)   
+	   norm(X - XTRUE) / norm(X) .le. FERR = norm( abs(inv(op(A)))*
+	   ( abs(R) + NZ*EPS*( abs(op(A))*abs(X)+abs(B) ))) / norm(X)
+          where
+            norm(Z) is the magnitude of the largest component of Z
+            inv(op(A)) is the inverse of op(A)
             abs(Z) is the componentwise absolute value of the matrix or
-	       vector Z   
-            NZ is the maximum number of nonzeros in any row of A, plus 1   
-            EPS is machine epsilon   
+	       vector Z
+            NZ is the maximum number of nonzeros in any row of A, plus 1
+            EPS is machine epsilon
 
-          The i-th component of abs(R)+NZ*EPS*(abs(op(A))*abs(X)+abs(B))   
-          is incremented by SAFE1 if the i-th component of   
-          abs(op(A))*abs(X) + abs(B) is less than SAFE2.   
+          The i-th component of abs(R)+NZ*EPS*(abs(op(A))*abs(X)+abs(B))
+          is incremented by SAFE1 if the i-th component of
+          abs(op(A))*abs(X) + abs(B) is less than SAFE2.
 
-          Use DLACON to estimate the infinity-norm of the matrix   
-             inv(op(A)) * diag(W),   
+          Use DLACON to estimate the infinity-norm of the matrix
+             inv(op(A)) * diag(W),
           where W = abs(R) + NZ*EPS*( abs(op(A))*abs(X)+abs(B) ))) */
-	
+
 	for (i = 0; i < A->nrow; ++i) rwork[i] = fabs( Bptr[i] );
-	
+
 	/* Compute abs(op(A))*abs(X) + abs(B). */
 	if ( notran ) {
 	    for (k = 0; k < A->ncol; ++k) {
@@ -371,7 +371,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 		rwork[k] += s;
 	    }
 	}
-	
+
 	for (i = 0; i < A->nrow; ++i)
 	    if (rwork[i] > safe2)
 		rwork[i] = fabs(work[i]) + (iwork[i]+1)*eps*rwork[i];
@@ -391,22 +391,22 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 		    for (i = 0; i < A->ncol; ++i) work[i] *= C[i];
 		else if ( !notran && rowequ )
 		    for (i = 0; i < A->nrow; ++i) work[i] *= R[i];
-		
+
 		dgstrs (transt, L, U, perm_r, perm_c, &Bjcol, Gstat, info);
-		
+
 		for (i = 0; i < A->nrow; ++i) work[i] *= rwork[i];
 	    } else {
 		/* Multiply by (diag(C) or diag(R))*inv(op(A))*diag(W). */
 		for (i = 0; i < A->nrow; ++i) work[i] *= rwork[i];
-		
+
 		dgstrs (trans, L, U, perm_r, perm_c, &Bjcol, Gstat, info);
-		
+
 		if ( notran && colequ )
 		    for (i = 0; i < A->ncol; ++i) work[i] *= C[i];
 		else if ( !notran && rowequ )
-		    for (i = 0; i < A->ncol; ++i) work[i] *= R[i];  
+		    for (i = 0; i < A->ncol; ++i) work[i] *= R[i];
 	    }
-	    
+
 	} while ( kase != 0 );
 
 
@@ -426,7 +426,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	    ferr[j] /= lstres;
 
     } /* for each RHS j ... */
-    
+
     SUPERLU_FREE(work);
     SUPERLU_FREE(rwork);
     SUPERLU_FREE(iwork);
