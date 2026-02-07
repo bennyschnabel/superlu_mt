@@ -1,11 +1,11 @@
-/* 
+/*
  * -- SuperLU MT routine (alpha version) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
  * and Lawrence Berkeley National Lab.
  * August 15, 1997
  *
  * Purpose
- * ======= 
+ * =======
  *	Returns the time in seconds used by the process.
  *
  * Note: the timer function call is machine dependent. Use conditional
@@ -14,13 +14,13 @@
  */
 
 
-#ifdef SUN 
+#ifdef SUN
 /*
- * 	It uses the system call gethrtime(3C), which is accurate to 
- *	nanoseconds. 
+ * 	It uses the system call gethrtime(3C), which is accurate to
+ *	nanoseconds.
 */
 #include <sys/time.h>
- 
+
 double SuperLU_timer_() {
     return ( (double)gethrtime() / 1e9 );
 }
@@ -65,7 +65,7 @@ struct timeval *tv;
 
   tmp = tv->tv_sec;
   tmp += tv->tv_usec/1000000.0;
- 
+
   return(tmp);
 }
 
@@ -79,4 +79,3 @@ double dclock()
 
     return(extract(&tp));
 }
-

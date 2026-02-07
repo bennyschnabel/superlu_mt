@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -42,7 +42,7 @@ dreadmt(int_t *m, int_t *n, int_t *nonz, double **nzval, int_t **rowind, int_t *
     double *a;
     int_t    *asub;
     int_t    *xa;
-    
+
     /* 	Matrix format:
      *         up to 60 characters           title
      *         integer nrow                  number of rows
@@ -58,33 +58,33 @@ dreadmt(int_t *m, int_t *n, int_t *nonz, double **nzval, int_t **rowind, int_t *
     dumptitle(title);
     printf("%s\n", title);
 
-    scanf("%d%d%d", m, n, nonz);
+    scanf(IFMT IFMT IFMT, m, n, nonz);
     dallocateA(*n, *nonz, nzval, rowind, colptr); /* Allocate storage */
     a    = *nzval;
     asub = *rowind;
     xa   = *colptr;
 
     for (i = 0; i < *n; i++) {
-	scanf("%d", &nnz);
+	scanf(IFMT, &nnz);
 	xa[i] = lasta;
         for (k = 0; k < nnz; k++) {
-	    scanf("%d%lf\n", &asub[lasta], &a[lasta]);
+	    scanf(IFMT "%lf\n", &asub[lasta], &a[lasta]);
 	    --asub[lasta];	/* C convention: 0-based indexing */
             lasta++;
         }
     }
     if ( *nonz < lasta ) {
-	fprintf(stderr, "nnz inconsistent: *nonz %d, lasta %d\n",*nonz,lasta);
+	fprintf(stderr, "nnz inconsistent: *nonz " IFMT ", lasta %d\n",*nonz,lasta);
 	exit(-1);
     }
-    
+
     xa[*n] = lasta--;
 
 #ifdef CHK_INPUT
     for (i = 0; i < *n; i++) {
-	printf("Col %d, xa %d\n", i, xa[i]);
+	printf("Col" IFMT ", xa " IFMT "\n", i, xa[i]);
 	for (k = xa[i]; k < xa[i+1]; k++)
-	    printf("%d %16.11e\n", asub[k], a[k]);
+	    printf(IFMT "%16.11e\n", asub[k], a[k]);
     }
 #endif
 
@@ -95,7 +95,7 @@ static
 void dumptitle(char *title)
 {
     int c, i = 0;
-	  
+
     while ((c = getchar()) != '\n') title[i++] = c;
     title[i] = '\0';
 }
