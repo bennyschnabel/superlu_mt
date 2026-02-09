@@ -224,9 +224,9 @@ psgssv(int_t nprocs, SuperMatrix *A, int_t *perm_c, int_t *perm_r,
     ops[FACT] = flopcnt;
 
 #if ( PRNTlevel==1 )
-    printf("nprocs = %d, flops %e, Mflops %.2f\n",
+    printf("nprocs = %" IFMT ", flops %e, Mflops %.2f\n",
 	   nprocs, flopcnt, flopcnt/utime[FACT]*1e-6);
-    printf("Parameters: w %d, relax %d, maxsuper %d, rowblk %d, colblk %d\n",
+    printf("Parameters: w %" IFMT ", relax %" IFMT ", maxsuper %" IFMT ", rowblk %" IFMT ", colblk %" IFMT "\n",
 	   sp_ienv(1), sp_ienv(2), sp_ienv(3), sp_ienv(4), sp_ienv(5));
     fflush(stdout);
 #endif

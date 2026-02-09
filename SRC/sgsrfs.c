@@ -149,11 +149,11 @@ sgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     extern double slamch_(char *);
     extern int_t slacon_(int_t *, float *, float *, int_t *, float *, int_t *);
 #ifdef _CRAY
-    extern int SCOPY(int *, float *, int *, float *, int *);
-    extern int SSAXPY(int *, float *, float *, int *, float *, int *);
+    extern int_t SCOPY(int_t *, float *, int_t *, float *, int_t *);
+    extern int_t SSAXPY(int_t *, float *, float *, int_t *, float *, int_t *);
 #else
-    extern int scopy_(int *, float *, int *, float *, int *);
-    extern int saxpy_(int *, float *, float *, int *, float *, int *);
+    extern int_t scopy_(int_t *, float *, int_t *, float *, int_t *);
+    extern int_t saxpy_(int_t *, float *, float *, int_t *, float *, int_t *);
 #endif
 
     Astore = A->Store;
