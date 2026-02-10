@@ -1,9 +1,9 @@
 /*! \file
 Copyright (c) 2003, The Regents of the University of California, through
-Lawrence Berkeley National Laboratory (subject to receipt of any required 
-approvals from U.S. Dept. of Energy) 
+Lawrence Berkeley National Laboratory (subject to receipt of any required
+approvals from U.S. Dept. of Energy)
 
-All rights reserved. 
+All rights reserved.
 
 The source code is distributed under BSD license, see the file License.txt
 at the top-level directory.
@@ -38,10 +38,10 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
  *
  * Arguments
  * =========
- * 
+ *
  * superlumt_options (input) superlumt_options_t*
  *        The structure defines the parameters to control how the sparse
- *        LU factorization is performed. The following fields must be set 
+ *        LU factorization is performed. The following fields must be set
  *        by the user:
  *
  *        o nprocs (int_t)
@@ -61,7 +61,7 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
  *
  *        o relax (int_t)
  *          Degree of relaxing supernodes. If the number of nodes (columns)
- *          in a subtree of the elimination tree is less than relax, this 
+ *          in a subtree of the elimination tree is less than relax, this
  *          subtree is considered as one supernode, regardless of the row
  *          structures of those columns.
  *
@@ -83,8 +83,8 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
  *          corresponding to not dropping any entry.
  *
  *        o perm_c (int_t*)
- *	    Column permutation vector of size A->ncol, which defines the 
- *          permutation matrix Pc; perm_c[i] = j means column i of A is 
+ *	    Column permutation vector of size A->ncol, which defines the
+ *          permutation matrix Pc; perm_c[i] = j means column i of A is
  *          in position j in A*Pc.
  *
  *        o perm_r (int_t*)
@@ -113,15 +113,15 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
  *        Row permutation vector which defines the permutation matrix Pr,
  *        perm_r[i] = j means row i of A is in position j in Pr*A.
  *        If superlumt_options->usepr = NO, perm_r is output argument;
- *        If superlumt_options->usepr = YES, the pivoting routine will try 
+ *        If superlumt_options->usepr = YES, the pivoting routine will try
  *           to use the input perm_r, unless a certain threshold criterion
  *           is violated. In that case, perm_r is overwritten by a new
- *           permutation determined by partial pivoting or diagonal 
+ *           permutation determined by partial pivoting or diagonal
  *           threshold pivoting.
  *
  * L      (output) SuperMatrix*
- *        The factor L from the factorization Pr*A=L*U; use compressed row 
- *        subscripts storage for supernodes, i.e., L has type: 
+ *        The factor L from the factorization Pr*A=L*U; use compressed row
+ *        subscripts storage for supernodes, i.e., L has type:
  *        Stype = SCP, Dtype = _D, Mtype = TRLU.
  *
  * U      (output) SuperMatrix*
@@ -130,7 +130,7 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
  *        Mtype = TRU.
  *
  * Gstat  (output) Gstat_t*
- *        Record all the statistics about the factorization; 
+ *        Record all the statistics about the factorization;
  *        See Gstat_t structure defined in slu_mt_util.h.
  *
  * info   (output) int_t*
@@ -168,19 +168,19 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
 
     /* Start timing factorization. */
     usrtime = usertimer_();
-    wtime = SuperLU_timer_(); 
+    wtime = SuperLU_timer_();
 
     /* ------------------------------------------------------------
        On a SUN multiprocessor system, use Solaris thread.
        ------------------------------------------------------------*/
 #if ( MACH==SUN )
-    
+
     /* Create nproc threads for concurrent factorization. */
     thread_id = (thread_t *) SUPERLU_MALLOC(nprocs * sizeof(thread_t));
-    
+
     for (i = 1; i < nprocs; ++i) {
 #if ( PRNTlevel==1 )
-	printf(".. Create unbound threads: i " IFMT ", nprocs " IFMT "\n",
+	printf(".. Create unbound threads: i %lld, nprocs %lld\n",
                i, nprocs);
 #endif
 	if ( (iinfo = thr_create(NULL, 0,
@@ -191,9 +191,9 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
 	    SUPERLU_ABORT("thr_creat()");
 	}
     }
-	 
+
     pdgstrf_thread( &(pdgstrf_threadarg[0]) );
-    
+
     /* Wait for all threads to terminate. */
     for (i = 1; i < nprocs; i++) thr_join(thread_id[i], 0, 0);
     SUPERLU_FREE (thread_id);
@@ -204,28 +204,28 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
        On a DEC multiprocessor system, use pthread.
        ------------------------------------------------------------*/
 #elif ( MACH==DEC )	/* Use DECthreads ... */
-    
+
     /* Create nproc threads for concurrent factorization. */
     thread_id = (pthread_t *) SUPERLU_MALLOC(nprocs * sizeof(pthread_t));
-    
+
     for (i = 0; i < nprocs; ++i) {
 	if ( iinfo = pthread_create(&thread_id[i],
 				    NULL,
-				    pdgstrf_thread, 
+				    pdgstrf_thread,
 				    &(pdgstrf_threadarg[i])) ) {
 	    fprintf(stderr, "pthread_create: %d\n", iinfo);
 	    SUPERLU_ABORT("pthread_create()");
 	}
 	/*	pthread_bind_to_cpu_np(thread_id[i], i);*/
     }
-	 
+
     /* Wait for all threads to terminate. */
     for (i = 0; i < nprocs; i++)
 	pthread_join(thread_id[i], &status);
     SUPERLU_FREE (thread_id);
 /* _DEC */
 
-    
+
     /* ------------------------------------------------------------
        On a SGI Power Challenge or Origin multiprocessor system,
        use parallel C.
@@ -273,20 +273,20 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
        Use POSIX threads.
        ------------------------------------------------------------*/
 #elif ( MACH==PTHREAD )	/* Use pthread ... */
-    
+
     /* Create nproc threads for concurrent factorization. */
     thread_id = (pthread_t *) SUPERLU_MALLOC(nprocs * sizeof(pthread_t));
-    
+
     for (i = 0; i < nprocs; ++i) {
 	if ( (iinfo = pthread_create(&thread_id[i],
 				    NULL,
-				    pdgstrf_thread, 
+				    pdgstrf_thread,
 				    &(pdgstrf_threadarg[i])) ) ) {
 	    fprintf(stderr, "pthread_create: " IFMT "\n", iinfo);
 	    SUPERLU_ABORT("pthread_create()");
 	}
     }
-	 
+
     /* Wait for all threads to terminate. */
     for (i = 0; i < nprocs; i++)
 	pthread_join(thread_id[i], &status);
@@ -314,8 +314,8 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
     printf("pdgstrf() is not parallelized on this machine.\n");
     printf("pdgstrf() will be run on single processor.\n");
     pdgstrf_thread( &(pdgstrf_threadarg[0]) );
-    
-#endif    
+
+#endif
 
     wtime = SuperLU_timer_() - wtime;
     usrtime = usertimer_() - usrtime;
@@ -327,11 +327,11 @@ pdgstrf(superlumt_options_t *superlumt_options, SuperMatrix *A, int_t *perm_r,
 #endif
 
     /* check_mem_leak("after pdgstrf_thread()"); */
-    
+
     /* ------------------------------------------------------------
        Clean up and free storage after multithreaded factorization.
        ------------------------------------------------------------*/
-    pdgstrf_thread_finalize(pdgstrf_threadarg, &pxgstrf_shared, 
+    pdgstrf_thread_finalize(pdgstrf_threadarg, &pxgstrf_shared,
 			    A, perm_r, L, U);
 
 }
